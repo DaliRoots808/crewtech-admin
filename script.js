@@ -247,7 +247,8 @@ function renderWorkersTable(data) {
     tr.appendChild(phoneTd);
 
     const linkTd = document.createElement('td');
-    const linkUrl = base + '?workerId=' + encodeURIComponent(w.id);
+    const linkUrl = `${window.location.origin}/worker.html?workerId=${encodeURIComponent(w.id)}`;
+
     const input = document.createElement('input');
     input.value = linkUrl;
     input.readOnly = true;
