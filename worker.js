@@ -287,13 +287,30 @@ document.addEventListener('DOMContentLoaded', () => {
         declineBtn.className = 'small danger';
         declineBtn.textContent = 'Decline';
 
-        // Phase 1: just log (no data mutation yet)
-        confirmBtn.addEventListener('click', () => {
-          console.log('Confirm clicked for job', job.id);
-        });
-        declineBtn.addEventListener('click', () => {
-          console.log('Decline clicked for job', job.id);
-        });
+        // ✅ When worker taps "Confirm"
+confirmBtn.addEventListener('click', () => {
+  // disable buttons so they can't double-tap
+  confirmBtn.disabled = true;
+  declineBtn.disabled = true;
+
+  // replace the buttons row with a "Confirmed" pill
+  actionsRow.innerHTML = '';
+  const pill = document.createElement('span');
+  pill.className = 'status-pill confirmed';
+  pill.textContent = 'Confirmed';
+  actionsRow.appendChild(pill);
+});
+
+// ✅ When worker taps "Decline"
+declineBtn.addEventListener('click', () => {
+  // simple UX for now: remove this card from the Open Jobs list
+  card.style.opacity = '0';
+  card.style.transform = 'translateY(4px)';
+  setTimeout(() => {
+    card.remove();
+  }, 180);
+});
+
 
         actionsRow.appendChild(confirmBtn);
         actionsRow.appendChild(declineBtn);
