@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CrewTech — Worker Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Reuse main stylesheet -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Splash (same look as admin for brand consistency) -->
+  <div id="splash-overlay">
+    <div class="splash-inner">
+      <div class="logo-shine-wrap">
+        <img src="crewtech_logo.png" alt="CrewTech logo" class="splash-logo" />
+      </div>
+      <p class="splash-caption">Loading your jobs…</p>
+    </div>
+  </div>
+
+  <div class="page">
+    <header>
+      <div class="header-logo-only">
+        <img src="crewtech_logo.png" alt="CrewTech logo" class="logo" />
+      </div>
+      <p class="tagline">Your crew, your time, your tool.</p>
+    </header>
+
+    <!-- Worker Dashboard wrapper -->
+    <main id="worker-dashboard">
+
+      <!-- Worker meta only (centered) -->
+    <p class="worker-meta-centered" id="worker-meta"></p>
+
+
+      <!-- 🟠 Open Jobs -->
+      <section class="section" id="open-jobs-section">
+        <h3>Open Jobs</h3>
+        <p class="muted">
+          These are shifts you’ve been invited to. Tap <strong>Confirm</strong> if you can work it,
+          or <strong>Decline</strong> if you can’t. New invites from your supervisor will show up here.
+        </p>
+        <div id="open-jobs"></div>
+      </section>
+
+      <!-- 🟢 Upcoming Shifts -->
+      <section class="section" id="upcoming-jobs-section">
+        <h3>Upcoming Shifts</h3>
+
+        <p class="muted">
+          These are the shifts you’ve already confirmed. Details may update if your boss changes the schedule,
+          so check here anytime for the latest info.
+        </p>
+        <p class="worker-note">(Need to cancel a shift? Please contact your supervisor directly.)</p>
+
+        <div id="upcoming-jobs"></div>
+
+        <!-- Show more / less toggle for upcoming shifts -->
+        <button id="upcoming-more-toggle" type="button" class="upcoming-toggle" aria-expanded="false">
+          <span class="label">Show more shifts</span>
+          <span class="caret">▾</span>
+        </button>
+      </section>
+
+      <!-- ⚪ Completed Jobs -->
+      <section class="section" id="completed-jobs-section">
+        <h3>Completed Jobs</h3>
+
+        <p class="muted">
+          These are the shifts you’ve already worked. Use this section to look back on hours, locations,
+          and details for your own records.
+        </p>
+
+        <div id="completed-jobs"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Worker logic -->
+  <script src="worker.js"></script>
+</body>
+</html>
