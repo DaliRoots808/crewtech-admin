@@ -207,30 +207,44 @@ textarea {
   resize: vertical;
 }
 
-/* BUTTONS */
+/* BASE BUTTONS – soft rectangle, Auto-Fill style */
 button {
-  border-radius: 999px;
-  border: none;
+  border-radius: 14px;
   padding: 0.55rem 1.2rem;
   font: inherit;
   cursor: pointer;
-  background: linear-gradient(135deg, var(--green-soft), var(--green));
-  color: #ffffff;
+
+  background: linear-gradient(145deg, #ffffff, #f3f4f6);
+  color: #1f2937;
   font-weight: 600;
-  transition:
-    transform 0.06s ease,
-    box-shadow 0.1s ease,
-    opacity 0.1s ease,
-    filter 0.1s ease;
+
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+
   white-space: nowrap;
-  box-shadow: 0 6px 18px rgba(22, 163, 74, 0.35);
+  transition: all 0.15s ease;
 }
 
+button:hover {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  filter: brightness(1.04);
+}
+
+button:active {
+  transform: translateY(1px);
+  box-shadow: none;
+  opacity: 0.96;
+}
+
+/* Smaller buttons (worker confirm/decline etc.) */
 button.small {
   padding: 0.32rem 0.9rem;
   font-size: 0.8rem;
 }
 
+/* Secondary + danger variants */
 button.secondary {
   background: #ffffff;
   color: var(--green);
@@ -244,22 +258,12 @@ button.danger {
   box-shadow: 0 6px 18px rgba(220, 38, 38, 0.3);
 }
 
-button:hover {
-  filter: brightness(1.04);
-}
-
 button.secondary:hover {
   background: var(--green-outline-bg);
 }
 
 button.danger:hover {
   background: #b91c1c;
-}
-
-button:active {
-  transform: translateY(1px);
-  box-shadow: none;
-  opacity: 0.96;
 }
 
 /* OVERVIEW JOB CARDS (Admin generic) */
@@ -731,7 +735,8 @@ button:active {
   margin-bottom: 0.4rem;
 }
 
-/* Center ONLY the All Jobs title (Admin) */
+/* Center Job Overview / All Jobs titles (Admin) */
+#schedule-overview-section h2,
 #all-jobs-section h2 {
   text-align: center;
   justify-content: center;
@@ -963,7 +968,7 @@ button:active {
   color: var(--orange-dark);
 }
 
-/* Generic clean button */
+/* Generic clean small button (worker confirm/decline) */
 button.small {
   padding: 0.45rem 1rem;
   border-radius: 10px;
@@ -1004,7 +1009,6 @@ button.small.danger {
   gap: 0.8rem;
   margin-top: 0.8rem;
 }
-
 
 /* ==================================================================== */
 /* UPCOMING SHIFTS – show 3 by default, expand to scroll for more       */
@@ -1059,4 +1063,56 @@ button.small.danger {
   font-weight: 400;
   margin-top: 0.5rem;
   margin-bottom: 1rem;
+}
+
+/* ==== WORKER PORTAL – ensure all upcoming shifts are visible ==== */
+#upcoming-jobs-section {
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+#upcoming-jobs {
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* Center the "See All Jobs" button at the bottom of the Schedule Overview card */
+#schedule-overview-section .see-all-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+}
+
+#see-all-jobs-btn {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Add breathing room under the overview job list */
+#next-jobs {
+  margin-bottom: 1rem;   /* adjust 1rem → 0.75rem or 1.2rem as needed */
+}
+
+
+/* Make See All Jobs + Add Worker match Auto-Fill style exactly */
+#see-all-jobs-btn,
+#add-worker-btn {
+  border-radius: 14px;
+  padding: 0.55rem 1.6rem;
+  font-size: 0.9rem;
+  background: linear-gradient(145deg, #ffffff, #f3f4f6);
+  color: #1f2937;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+#see-all-jobs-btn:hover,
+#add-worker-btn:hover {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+}
+
+/* Center the "Next 3 upcoming jobs." line in Schedule Overview */
+#schedule-overview-section > p {
+  text-align: center;
 }

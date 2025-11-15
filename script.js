@@ -73,16 +73,13 @@ function formatTime(timeStr) {
 
 function getBaseWorkerUrl() {
   const url = new URL(window.location.href);
-  // strip index.html if present
   url.pathname = url.pathname.replace(/index\.html$/, '');
   if (!url.pathname.endsWith('/')) url.pathname += '/';
-  // ✅ point worker links to the new Worker Portal page
-  url.pathname += 'worker.html';
+  url.pathname += 'boothboss-worker.html'; // (keep for now if you use this route)
   url.search = '';
   url.hash = '';
   return url.toString();
 }
-
 
 /* ========== Assignments Helpers ========== */
 function getAssignments(job) {
@@ -247,8 +244,7 @@ function renderWorkersTable(data) {
     tr.appendChild(phoneTd);
 
     const linkTd = document.createElement('td');
-    const linkUrl = `${window.location.origin}/worker.html?workerId=${encodeURIComponent(w.id)}`;
-
+    const linkUrl = base + '?workerId=' + encodeURIComponent(w.id);
     const input = document.createElement('input');
     input.value = linkUrl;
     input.readOnly = true;

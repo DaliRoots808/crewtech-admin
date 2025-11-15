@@ -27,13 +27,19 @@
     </header>
 
     <!-- Schedule Overview -->
-    <section class="section" id="overview-section">
-      <div class="row">
-        <h2>Schedule Overview</h2>
-        <button class="secondary small" id="see-all-jobs-btn">See All Jobs</button>
-      </div>
+    <section class="section" id="schedule-overview-section">
+      <!-- NEW TITLE -->
+      <h2>Schedule Overview</h2>
+
       <p>Next 3 upcoming jobs.</p>
       <div id="next-jobs"></div>
+
+      <div class="see-all-wrapper">
+        <button id="see-all-jobs-btn" class="see-all-link" aria-expanded="false">
+          <span class="label">See all jobs</span>
+          <span class="caret">▾</span>
+        </button>
+      </div>
     </section>
 
     <!-- Add Job / Shifts -->
@@ -124,39 +130,51 @@
     </section>
 
     <!-- Workers -->
+
+    
     <section class="section" id="workers-section">
-      <div class="row" style="margin-bottom:0.5rem;">
-        <h2>Workers</h2>
-        <div class="row" style="gap:0.4rem;">
-          <button class="secondary small" id="show-workers-btn">Show list</button>
-        </div>
-      </div>
+  <div class="row" style="margin-bottom:0.5rem;">
+    <h2>Workers</h2>
+  </div>
 
-      <p>Add your crew here. Each worker gets a unique ID and a personal link to their schedule.</p>
-      <p class="muted" id="workers-cloud-status" style="font-size:0.78rem; margin-top:0.1rem;"></p>
+  <p>Add your crew here. Each worker gets a unique ID and a personal link to their schedule.</p>
+  <p class="muted" id="workers-cloud-status" style="font-size:0.78rem; margin-top:0.1rem;"></p>
 
-      <div class="grid workers-grid">
-        <div class="field">
-          <label for="worker-name">Name</label>
-          <input id="worker-name" placeholder="e.g. Carlos M." />
-        </div>
-        <div class="field">
-          <label for="worker-phone">Phone (optional)</label>
-          <input id="worker-phone" placeholder="e.g. 702-555-1234" />
-        </div>
-      </div>
+  <div class="grid workers-grid">
+    <div class="field">
+      <label for="worker-name">Name</label>
+      <input id="worker-name" placeholder="e.g. Carlos M." />
+    </div>
+    <div class="field">
+      <label for="worker-phone">Phone (optional)</label>
+      <input id="worker-phone" placeholder="e.g. 702-555-1234" />
+    </div>
+  </div>
 
-      <div class="center-btn">
-        <button id="add-worker-btn">Add New Worker</button>
-      </div>
+ <div class="row" style="margin-top:0.75rem; align-items:center; position:relative;">
+  
+  <!-- Centered Add Worker button -->
+  <div style="flex:1; display:flex; justify-content:center;">
+    <button id="add-worker-btn">Add New Worker</button>
+  </div>
 
-      <div id="workers-list" style="margin-top:0.75rem; display:none;">
-        <p class="muted" style="margin-bottom:0.4rem;">Click a link field to select; long-press to copy on mobile.</p>
-        <div class="scroll-x">
-          <table class="table" id="workers-table"><!-- rows injected --></table>
-        </div>
-      </div>
-    </section>
+  <!-- Right-aligned Show List button -->
+  <button class="secondary small" id="show-workers-btn"
+          style="position:absolute; right:0;">
+    Show list
+  </button>
+
+</div>
+
+
+  <div id="workers-list" style="margin-top:0.75rem; display:none;">
+    <p class="muted" style="margin-bottom:0.4rem;">Click a link field to select; long-press to copy on mobile.</p>
+    <div class="scroll-x">
+      <table class="table" id="workers-table"><!-- rows injected --></table>
+    </div>
+  </div>
+</section>
+
 
     <!-- All Jobs & Export -->
     <section class="section" id="all-jobs-section">
