@@ -1,0 +1,785 @@
+{
+  "version": 1,
+  "createdAt": "2025-11-15T05:57:47.562Z",
+  "workers": [
+    {
+      "id": "w_aurvmvm",
+      "name": "Mike “Big Rig” D.",
+      "phone": "702-555-0103"
+    },
+    {
+      "id": "w_p861qov",
+      "name": "Sam K.",
+      "phone": "702-555-0104"
+    },
+    {
+      "id": "w_o6to4x3",
+      "name": "Pat Rizza",
+      "phone": "555-650-4345"
+    },
+    {
+      "id": "w_5dpwu4x",
+      "name": "sean conary",
+      "phone": "555-654-3232"
+    }
+  ],
+  "jobs": [
+    {
+      "id": "j_fxwtcoi",
+      "name": "Build",
+      "date": "2025-12-08",
+      "startTime": "07:00",
+      "endTime": "15:00",
+      "booth": "4219",
+      "location": "LVCC Central Hall",
+      "notes": "",
+      "rawText": "Build – NAB Show – Apr 8th – 7am to 3pm – Booth 4219 – LVCC Central Hall",
+      "phase": "Build",
+      "assignments": [
+        {
+          "workerId": "w_aurvmvm",
+          "status": "Confirmed"
+        },
+        {
+          "workerId": "w_p861qov",
+          "status": "Confirmed"
+        }
+      ],
+      "assignedWorkerIds": [
+        "w_aurvmvm",
+        "w_p861qov"
+      ]
+    },
+    {
+      "id": "j_71t6uuy",
+      "name": "KKKK",
+      "date": "2025-12-09",
+      "startTime": "07:00",
+      "endTime": "15:00",
+      "booth": "4219",
+      "location": "LVCC Central Hall",
+      "notes": "",
+      "rawText": "Build – NAB Show – Apr 8th – 7am to 3pm – Booth 4219 – LVCC Central Hall",
+      "phase": "Dismantle",
+      "assignments": [
+        {
+          "workerId": "w_aurvmvm",
+          "status": "Confirmed"
+        },
+        {
+          "workerId": "w_p861qov",
+          "status": "Confirmed"
+        }
+      ],
+      "assignedWorkerIds": [
+        "w_aurvmvm",
+        "w_p861qov"
+      ]
+    },
+    {
+      "id": "j_73lmpgo",
+      "name": "Build",
+      "date": "2025-12-09",
+      "startTime": "07:00",
+      "endTime": "15:00",
+      "booth": "4219",
+      "location": "LVCC Central Hall",
+      "notes": "",
+      "rawText": "Build – NAB Show – Apr 8th – 7am to 3pm – Booth 4219 – LVCC Central Hall",
+      "phase": "Build",
+      "assignments": [
+        {
+          "workerId": "w_aurvmvm",
+          "status": "Confirmed"
+        },
+        {
+          "workerId": "w_p861qov",
+          "status": "Confirmed"
+        }
+      ],
+      "assignedWorkerIds": [
+        "w_aurvmvm",
+        "w_p861qov"
+      ]
+    },
+    {
+      "id": "j_zxkquur",
+      "name": "JJJ",
+      "date": "2026-01-09",
+      "startTime": "08:00",
+      "endTime": "16:00",
+      "booth": "712",
+      "location": "Anaheim Convention Center",
+      "notes": "",
+      "rawText": "Dismantle – Comic Con Booth 712 – July 24 – 8am to 4pm – Anaheim Convention Center",
+      "phase": "Assist",
+      "assignments": [
+        {
+          "workerId": "w_aurvmvm",
+          "status": "Declined"
+        },
+        {
+          "workerId": "w_p861qov",
+          "status": "Confirmed"
+        }
+      ],
+      "assignedWorkerIds": [
+        "w_aurvmvm",
+        "w_p861qov"
+      ]
+    },
+    {
+      "id": "j_3ywygtv",
+      "name": "Dismantle",
+      "date": "2026-01-11",
+      "startTime": "08:00",
+      "endTime": "16:00",
+      "booth": "712",
+      "location": "Anaheim Convention Center",
+      "notes": "",
+      "rawText": "Dismantle – Comic Con Booth 712 – July 24 – 8am to 4pm – Anaheim Convention Center",
+      "phase": "Dismantle",
+      "assignments": [
+        {
+          "workerId": "w_aurvmvm",
+          "status": "Confirmed"
+        }
+      ],
+      "assignedWorkerIds": [
+        "w_aurvmvm"
+      ]
+    },
+    {
+      "id": "j_n5tsonw",
+      "name": "asdasd",
+      "date": "2026-01-22",
+      "startTime": "08:00",
+      "endTime": "16:00",
+      "booth": "712",
+      "location": "Anaheim Convention Center",
+      "notes": "",
+      "rawText": "Dismantle – Comic Con Booth 712 – July 24 – 8am to 4pm – Anaheim Convention Center",
+      "phase": "Build",
+      "assignments": [
+        {
+          "workerId": "w_p861qov",
+          "status": "Confirmed"
+        }
+      ],
+      "assignedWorkerIds": [
+        "w_p861qov"
+      ]
+    },
+    {
+      "id": "j_vvpd2x2",
+      "name": "Build",
+      "date": "2026-02-09",
+      "startTime": "08:00",
+      "endTime": "16:00",
+      "booth": "712",
+      "location": "Anaheim Convention Center",
+      "notes": "",
+      "rawText": "Dismantle – Comic Con Booth 712 – July 24 – 8am to 4pm – Anaheim Convention Center",
+      "phase": "Dismantle",
+      "assignments": [],
+      "assignedWorkerIds": []
+    },
+    {
+      "id": "j_vpfsz7r",
+      "name": "Con",
+      "date": "2026-04-12",
+      "startTime": "11:00",
+      "endTime": "17:00",
+      "booth": "4012",
+      "location": "",
+      "notes": "",
+      "rawText": "Con 11/12 8:00 AM to 5:00 PM Booth 4012 LVCC West Hall\nNov 12, 2025 • 11:00 AM – 5:00 PM • Booth 4012",
+      "phase": "Assist",
+      "assignments": [
+        {
+          "workerId": "w_aurvmvm",
+          "status": "confirmed"
+        }
+      ],
+      "assignedWorkerIds": [
+        "w_aurvmvm"
+      ]
+    },
+    {
+      "id": "j_pdvit36",
+      "name": "Love",
+      "date": "2025-11-14",
+      "startTime": "09:00",
+      "endTime": "15:00",
+      "booth": "4219",
+      "location": "",
+      "notes": "",
+      "rawText": "Dec 9, 2025 • 7:00 AM – 3:00 PM • Booth 4219 • LVCC Central Hall\nWorkers: Mike “Big Rig” D. (C), Sam K. (C)",
+      "phase": "",
+      "assignments": [
+        {
+          "workerId": "w_aurvmvm",
+          "status": "Confirmed"
+        },
+        {
+          "workerId": "w_p861qov",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_o6to4x3",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_5dpwu4x",
+          "status": "Invited"
+        }
+      ],
+      "assignedWorkerIds": [
+        "w_aurvmvm",
+        "w_p861qov",
+        "w_o6to4x3",
+        "w_5dpwu4x"
+      ]
+    },
+    {
+      "id": "j_bca2vu1",
+      "name": "Jut",
+      "date": "2026-01-03",
+      "startTime": "23:40",
+      "endTime": "07:40",
+      "booth": "",
+      "location": "",
+      "notes": "",
+      "rawText": "Jut\n • 7:00 AM – 3:00 PM • Booth 4219 • LVCC Central Hall",
+      "phase": "Dismantle",
+      "assignments": [
+        {
+          "workerId": "w_aurvmvm",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_p861qov",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_o6to4x3",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_5dpwu4x",
+          "status": "Invited"
+        }
+      ],
+      "assignedWorkerIds": [
+        "w_aurvmvm",
+        "w_p861qov",
+        "w_o6to4x3",
+        "w_5dpwu4x"
+      ]
+    },
+    {
+      "id": "j_cwnijoj",
+      "name": "KATS",
+      "date": "2026-03-24",
+      "startTime": "14:00",
+      "endTime": "01:40",
+      "booth": "4219",
+      "location": "",
+      "notes": "",
+      "rawText": "Nov 14, 2025 • 9:00 AM – 3:00 PM • Booth 4219",
+      "phase": "Build",
+      "assignments": [
+        {
+          "workerId": "w_aurvmvm",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_p861qov",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_o6to4x3",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_5dpwu4x",
+          "status": "confirmed"
+        }
+      ],
+      "assignedWorkerIds": [
+        "w_aurvmvm",
+        "w_p861qov",
+        "w_o6to4x3",
+        "w_5dpwu4x"
+      ]
+    },
+    {
+      "id": "j_29aknfc",
+      "name": "spark",
+      "date": "2026-03-19",
+      "startTime": "18:42",
+      "endTime": "19:43",
+      "booth": "",
+      "location": "",
+      "notes": "",
+      "rawText": "",
+      "phase": "Dismantle",
+      "assignments": [
+        {
+          "workerId": "w_aurvmvm",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_p861qov",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_o6to4x3",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_5dpwu4x",
+          "status": "confirmed"
+        }
+      ],
+      "assignedWorkerIds": [
+        "w_aurvmvm",
+        "w_p861qov",
+        "w_o6to4x3",
+        "w_5dpwu4x"
+      ]
+    },
+    {
+      "id": "j_ezlldh8",
+      "name": "GART",
+      "date": "2026-03-13",
+      "startTime": "12:00",
+      "endTime": "18:00",
+      "booth": "4219",
+      "location": "",
+      "notes": "",
+      "rawText": "Dec 9, 2025 • 7:00 AM – 3:00 PM • Booth 4219 • LVCC Central Hall",
+      "phase": "Assist",
+      "assignments": [
+        {
+          "workerId": "w_aurvmvm",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_p861qov",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_o6to4x3",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_5dpwu4x",
+          "status": "Invited"
+        }
+      ],
+      "assignedWorkerIds": [
+        "w_aurvmvm",
+        "w_p861qov",
+        "w_o6to4x3",
+        "w_5dpwu4x"
+      ]
+    },
+    {
+      "id": "j_6mtc5ds",
+      "name": "SLAT",
+      "date": "2026-03-25",
+      "startTime": "12:00",
+      "endTime": "22:29",
+      "booth": "4219",
+      "location": "",
+      "notes": "",
+      "rawText": "SLAT Dec 9, 2025 • 7:00 AM – 3:00 PM • Booth 4219 • LVCC Central Hall",
+      "phase": "Build",
+      "assignments": [
+        {
+          "workerId": "w_aurvmvm",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_p861qov",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_o6to4x3",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_5dpwu4x",
+          "status": "confirmed"
+        }
+      ],
+      "assignedWorkerIds": [
+        "w_aurvmvm",
+        "w_p861qov",
+        "w_o6to4x3",
+        "w_5dpwu4x"
+      ]
+    },
+    {
+      "id": "j_vynoh9i",
+      "name": "ld",
+      "date": "2026-03-26",
+      "startTime": "19:41",
+      "endTime": "21:42",
+      "booth": "",
+      "location": "",
+      "notes": "",
+      "rawText": "ld\nDec 8, 2025 • 7:00 AM – 3:00 PM • Booth 4219 • LVCC Central Hal",
+      "phase": "Build",
+      "assignments": [
+        {
+          "workerId": "w_aurvmvm",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_p861qov",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_o6to4x3",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_5dpwu4x",
+          "status": "confirmed"
+        }
+      ],
+      "assignedWorkerIds": [
+        "w_aurvmvm",
+        "w_p861qov",
+        "w_o6to4x3",
+        "w_5dpwu4x"
+      ]
+    },
+    {
+      "id": "j_hue7jno",
+      "name": "ld",
+      "date": "2026-03-25",
+      "startTime": "17:42",
+      "endTime": "20:42",
+      "booth": "",
+      "location": "",
+      "notes": "",
+      "rawText": "ld\nDec 8, 2025 • 7:00 AM – 3:00 PM • Booth 4219 • LVCC Central Hal",
+      "phase": "Build",
+      "assignments": [
+        {
+          "workerId": "w_aurvmvm",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_p861qov",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_o6to4x3",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_5dpwu4x",
+          "status": "confirmed"
+        }
+      ],
+      "assignedWorkerIds": [
+        "w_aurvmvm",
+        "w_p861qov",
+        "w_o6to4x3",
+        "w_5dpwu4x"
+      ]
+    },
+    {
+      "id": "j_rn8k1bt",
+      "name": "ld",
+      "date": "2026-05-06",
+      "startTime": "18:42",
+      "endTime": "19:42",
+      "booth": "",
+      "location": "",
+      "notes": "",
+      "rawText": "ld\nDec 8, 2025 • 7:00 AM – 3:00 PM • Booth 4219 • LVCC Central Hal",
+      "phase": "Assist",
+      "assignments": [
+        {
+          "workerId": "w_aurvmvm",
+          "status": "Confirmed"
+        },
+        {
+          "workerId": "w_p861qov",
+          "status": "Confirmed"
+        },
+        {
+          "workerId": "w_o6to4x3",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_5dpwu4x",
+          "status": "Confirmed"
+        }
+      ],
+      "assignedWorkerIds": [
+        "w_aurvmvm",
+        "w_p861qov",
+        "w_o6to4x3",
+        "w_5dpwu4x"
+      ]
+    },
+    {
+      "id": "j_0smtekh",
+      "name": "jjhjh",
+      "date": "2026-06-24",
+      "startTime": "19:43",
+      "endTime": "18:43",
+      "booth": "",
+      "location": "",
+      "notes": "",
+      "rawText": "",
+      "phase": "Build",
+      "assignments": [
+        {
+          "workerId": "w_aurvmvm",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_p861qov",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_o6to4x3",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_5dpwu4x",
+          "status": "confirmed"
+        }
+      ],
+      "assignedWorkerIds": [
+        "w_aurvmvm",
+        "w_p861qov",
+        "w_o6to4x3",
+        "w_5dpwu4x"
+      ]
+    },
+    {
+      "id": "j_jfjw3on",
+      "name": "make this shit work",
+      "date": "2026-03-12",
+      "startTime": "19:24",
+      "endTime": "22:24",
+      "booth": "",
+      "location": "",
+      "notes": "",
+      "rawText": "make this shit work",
+      "phase": "Dismantle",
+      "assignments": [
+        {
+          "workerId": "w_aurvmvm",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_p861qov",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_o6to4x3",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_5dpwu4x",
+          "status": "Invited"
+        }
+      ],
+      "assignedWorkerIds": [
+        "w_aurvmvm",
+        "w_p861qov",
+        "w_o6to4x3",
+        "w_5dpwu4x"
+      ]
+    },
+    {
+      "id": "j_yad7lq0",
+      "name": "work work",
+      "date": "2026-02-11",
+      "startTime": "17:25",
+      "endTime": "22:25",
+      "booth": "",
+      "location": "",
+      "notes": "",
+      "rawText": "work work",
+      "phase": "Dismantle",
+      "assignments": [
+        {
+          "workerId": "w_aurvmvm",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_p861qov",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_o6to4x3",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_5dpwu4x",
+          "status": "Invited"
+        }
+      ],
+      "assignedWorkerIds": [
+        "w_aurvmvm",
+        "w_p861qov",
+        "w_o6to4x3",
+        "w_5dpwu4x"
+      ]
+    },
+    {
+      "id": "j_a2e0d2t",
+      "name": "lets goooo",
+      "date": "2026-02-10",
+      "startTime": "18:26",
+      "endTime": "23:26",
+      "booth": "",
+      "location": "",
+      "notes": "",
+      "rawText": "lets goooo",
+      "phase": "Dismantle",
+      "assignments": [
+        {
+          "workerId": "w_aurvmvm",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_p861qov",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_o6to4x3",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_5dpwu4x",
+          "status": "Invited"
+        }
+      ],
+      "assignedWorkerIds": [
+        "w_aurvmvm",
+        "w_p861qov",
+        "w_o6to4x3",
+        "w_5dpwu4x"
+      ]
+    },
+    {
+      "id": "j_2t9aj3r",
+      "name": "new job",
+      "date": "2026-04-14",
+      "startTime": "20:24",
+      "endTime": "23:24",
+      "booth": "",
+      "location": "",
+      "notes": "",
+      "rawText": "asdf",
+      "phase": "Dismantle",
+      "assignments": [
+        {
+          "workerId": "w_aurvmvm",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_p861qov",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_o6to4x3",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_5dpwu4x",
+          "status": "confirmed"
+        }
+      ],
+      "assignedWorkerIds": [
+        "w_aurvmvm",
+        "w_p861qov",
+        "w_o6to4x3",
+        "w_5dpwu4x"
+      ]
+    },
+    {
+      "id": "j_vwkmrjt",
+      "name": "new job 2",
+      "date": "2026-03-11",
+      "startTime": "21:25",
+      "endTime": "00:25",
+      "booth": "",
+      "location": "",
+      "notes": "",
+      "rawText": "",
+      "phase": "Dismantle",
+      "assignments": [
+        {
+          "workerId": "w_aurvmvm",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_p861qov",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_o6to4x3",
+          "status": "confirmed"
+        },
+        {
+          "workerId": "w_5dpwu4x",
+          "status": "Invited"
+        }
+      ],
+      "assignedWorkerIds": [
+        "w_aurvmvm",
+        "w_p861qov",
+        "w_o6to4x3",
+        "w_5dpwu4x"
+      ]
+    },
+    {
+      "id": "j_q0dt76m",
+      "name": "new jobs three",
+      "date": "2026-04-20",
+      "startTime": "23:25",
+      "endTime": "",
+      "booth": "",
+      "location": "",
+      "notes": "",
+      "rawText": "",
+      "phase": "Build",
+      "assignments": [
+        {
+          "workerId": "w_aurvmvm",
+          "status": "Confirmed"
+        },
+        {
+          "workerId": "w_p861qov",
+          "status": "Confirmed"
+        },
+        {
+          "workerId": "w_o6to4x3",
+          "status": "Confirmed"
+        },
+        {
+          "workerId": "w_5dpwu4x",
+          "status": "Confirmed"
+        }
+      ],
+      "assignedWorkerIds": [
+        "w_aurvmvm",
+        "w_p861qov",
+        "w_o6to4x3",
+        "w_5dpwu4x"
+      ]
+    }
+  ]
+}

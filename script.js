@@ -72,14 +72,18 @@ function formatTime(timeStr) {
 }
 
 function getBaseWorkerUrl() {
-  const url = new URL(window.location.href);
-  url.pathname = url.pathname.replace(/index\.html$/, '');
-  if (!url.pathname.endsWith('/')) url.pathname += '/';
-  url.pathname += 'boothboss-worker.html'; // (keep for now if you use this route)
-  url.search = '';
-  url.hash = '';
-  return url.toString();
+  const { origin, pathname } = window.location;
+
+  // Strip off index.html if it's there
+  let basePath = pathname.replace(/index\.html$/, '');
+
+  // Strip trailing slash
+  basePath = basePath.replace(/\/$/, '');
+
+  // Point to worker.html in the same folder
+  return `${origin}${basePath}/worker.html`;
 }
+
 
 /* ========== Assignments Helpers ========== */
 function getAssignments(job) {
@@ -815,26 +819,41 @@ async function loadWorkersFromCloud() {
 document.addEventListener('DOMContentLoaded', () => {
   let data = loadData();
 
-
-
   const workersList = document.getElementById('workers-list');
-  const showWorkersBtn = document.getElementById('show-workers-btn');
+  const showWorkersBtn = document.getElementById('show-workers-btn'); // may or may not exist
+  const workersToggle = document.getElementById('workers-toggle');    // header with caret
+
   const resetDataBtn = document.getElementById('reset-data-btn'); // optional
   const addWorkerBtn = document.getElementById('add-worker-btn');
   const addJobBtn = document.getElementById('add-job-btn');
   const exportCsvBtn = document.getElementById('export-csv-btn'); // optional
   const seeAllJobsBtn = document.getElementById('see-all-jobs-btn');
   const allJobsSection = document.getElementById('all-jobs-section');
-  
-// Scroll "See All Jobs" to the All Jobs section
-if (seeAllJobsBtn && allJobsSection) {
-  seeAllJobsBtn.addEventListener('click', () => {
-    allJobsSection.setAttribute('tabindex', '-1'); // a11y focus target
-    allJobsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    allJobsSection.focus({ preventScroll: true });
-    setTimeout(() => allJobsSection.removeAttribute('tabindex'), 300);
-  });
-}
+
+  // Helper: open/close Workers list + sync caret and button label
+  function setWorkersOpen(isOpen) {
+    if (workersList) {
+      workersList.style.display = isOpen ? 'block' : 'none';
+    }
+    if (workersToggle) {
+      workersToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      const caret = workersToggle.querySelector('.caret');
+      if (caret) caret.textContent = isOpen ? '▾' : '▸';
+    }
+    if (showWorkersBtn) {
+      showWorkersBtn.textContent = isOpen ? 'Hide list' : 'Show list';
+    }
+  }
+
+  // Scroll "See All Jobs" to the All Jobs section
+  if (seeAllJobsBtn && allJobsSection) {
+    seeAllJobsBtn.addEventListener('click', () => {
+      allJobsSection.setAttribute('tabindex', '-1'); // a11y focus target
+      allJobsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      allJobsSection.focus({ preventScroll: true });
+      setTimeout(() => allJobsSection.removeAttribute('tabindex'), 300);
+    });
+  }
 
   const addJobToggle = document.getElementById('add-job-toggle');
   const addJobBody   = document.getElementById('add-job-body');
@@ -858,6 +877,25 @@ if (seeAllJobsBtn && allJobsSection) {
       }
     });
     setAddJobOpen(false);
+  }
+
+  // Workers section: make the "Workers" title + caret clickable
+  if (workersToggle && workersList) {
+    workersToggle.addEventListener('click', () => {
+      const isOpen = workersList.style.display !== 'none';
+      setWorkersOpen(!isOpen);
+    });
+
+    workersToggle.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const isOpen = workersList.style.display !== 'none';
+        setWorkersOpen(!isOpen);
+      }
+    });
+
+    // Start collapsed by default
+    setWorkersOpen(false);
   }
 
   const autoFillBtn = document.getElementById('auto-fill-btn');
@@ -944,12 +982,11 @@ if (seeAllJobsBtn && allJobsSection) {
     });
   }
 
-  /* Workers list toggle */
+  /* Workers list toggle via optional button, if still present */
   if (showWorkersBtn && workersList) {
     showWorkersBtn.addEventListener('click', () => {
       const currentlyVisible = workersList.style.display !== 'none';
-      workersList.style.display = currentlyVisible ? 'none' : 'block';
-      showWorkersBtn.textContent = currentlyVisible ? 'Show list' : 'Hide list';
+      setWorkersOpen(!currentlyVisible);
     });
   }
 
@@ -984,8 +1021,8 @@ if (seeAllJobsBtn && allJobsSection) {
       phoneInput.value = '';
       rerenderAll();
 
-      workersList.style.display = 'block';
-      if (showWorkersBtn) showWorkersBtn.textContent = 'Hide list';
+      // When a worker is added, ensure the list is visible + caret open
+      setWorkersOpen(true);
     });
   }
 

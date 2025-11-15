@@ -71,6 +71,10 @@ header p.muted {
   color: var(--text-muted);
 }
 
+h2[role="button"] {
+  cursor: pointer;
+}
+
 /* SECTIONS (WHITE CARDS) */
 .section {
   background: #ffffff;

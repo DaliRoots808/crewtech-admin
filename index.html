@@ -129,13 +129,14 @@
       </div>
     </section>
 
-    <!-- Workers -->
+   <!-- Workers -->
+<section class="section" id="workers-section">
 
-    
-    <section class="section" id="workers-section">
-  <div class="row" style="margin-bottom:0.5rem;">
-    <h2>Workers</h2>
-  </div>
+  <!-- Workers title with caret toggle -->
+  <h2 id="workers-toggle" role="button" tabindex="0" aria-expanded="false" title="Show/Hide">
+    <span>Workers</span>
+    <span class="caret" aria-hidden="true">▸</span>
+  </h2>
 
   <p>Add your crew here. Each worker gets a unique ID and a personal link to their schedule.</p>
   <p class="muted" id="workers-cloud-status" style="font-size:0.78rem; margin-top:0.1rem;"></p>
@@ -151,30 +152,22 @@
     </div>
   </div>
 
- <div class="row" style="margin-top:0.75rem; align-items:center; position:relative;">
-  
-  <!-- Centered Add Worker button -->
-  <div style="flex:1; display:flex; justify-content:center;">
-    <button id="add-worker-btn">Add New Worker</button>
+  <!-- Add Worker button centered (unchanged) -->
+  <div class="row" style="margin-top:0.75rem; align-items:center;">
+    <div style="flex:1; display:flex; justify-content:center;">
+      <button id="add-worker-btn">Add New Worker</button>
+    </div>
   </div>
 
-  <!-- Right-aligned Show List button -->
-  <button class="secondary small" id="show-workers-btn"
-          style="position:absolute; right:0;">
-    Show list
-  </button>
-
-</div>
-
-
+  <!-- Hidden workers list (expands when caret toggled) -->
   <div id="workers-list" style="margin-top:0.75rem; display:none;">
     <p class="muted" style="margin-bottom:0.4rem;">Click a link field to select; long-press to copy on mobile.</p>
     <div class="scroll-x">
       <table class="table" id="workers-table"><!-- rows injected --></table>
     </div>
   </div>
-</section>
 
+</section>
 
     <!-- All Jobs & Export -->
     <section class="section" id="all-jobs-section">
