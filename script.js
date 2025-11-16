@@ -599,9 +599,74 @@ function renderJobsTable(data) {
 
       details.appendChild(workersBlock);
 
-      const actions = document.createElement('div');
+            const actions = document.createElement('div');
       actions.className = 'job-actions';
 
+      // --- Send SMS Invites button ---
+      const smsBtn = document.createElement('button');
+      smsBtn.className = 'small secondary';
+      smsBtn.textContent = 'Send SMS Invites';
+
+      smsBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+
+        // Get assigned workers that actually have phone numbers
+        const workersWithPhones = getAssignments(job)
+          .map((a) => data.workers.find((w) => w.id === a.workerId))
+          .filter((w) => w && w.phone);
+
+        if (!workersWithPhones.length) {
+          alert('No workers with phone numbers assigned to this job.');
+          return;
+        }
+
+        if (!confirm(`Send SMS invites to ${workersWithPhones.length} worker(s)?`)) {
+          return;
+        }
+
+        smsBtn.disabled = true;
+        const originalLabel = smsBtn.textContent;
+        smsBtn.textContent = 'Sending…';
+
+        const base = getBaseWorkerUrl();
+        let failures = 0;
+
+        for (const w of workersWithPhones) {
+          const workerLink = `${base}?workerId=${encodeURIComponent(w.id)}`;
+
+          const msg = `CrewTech: ${job.name || 'Job'} on ${job.date || ''} ${job.startTime || ''}-${job.endTime || ''}. View details & confirm: ${workerLink}`;
+
+          try {
+            const res = await fetch('/.netlify/functions/sendSMS', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                phone: w.phone,
+                message: msg
+              })
+            });
+
+            if (!res.ok) {
+              console.error('SMS failed for', w.name, await res.text());
+              failures++;
+            }
+          } catch (err) {
+            console.error('SMS error for', w.name, err);
+            failures++;
+          }
+        }
+
+        smsBtn.disabled = false;
+        smsBtn.textContent = originalLabel;
+
+        if (failures) {
+          alert(`SMS sent with ${failures} error(s). Check Netlify function logs for details.`);
+        } else {
+          alert('SMS invites sent!');
+        }
+      });
+
+      // --- Delete job button, same as before ---
       const deleteBtn = document.createElement('button');
       deleteBtn.className = 'danger small';
       deleteBtn.textContent = 'Delete job';
@@ -615,8 +680,10 @@ function renderJobsTable(data) {
         else { renderJobsTable(data); renderOverview(data); }
       });
 
+      actions.appendChild(smsBtn);
       actions.appendChild(deleteBtn);
       details.appendChild(actions);
+
 
       let open = false;
       headerRow.addEventListener('click', () => {
