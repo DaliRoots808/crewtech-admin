@@ -25,7 +25,7 @@ function generateId(prefix) {
 }
 
 function sortJobsByDateTime(jobs) {
-  return [...jobs].sort((a, b) => {
+  return [...(jobs || [])].sort((a, b) => {
     const da = new Date((a.date || '') + ' ' + (a.startTime || '00:00'));
     const db = new Date((b.date || '') + ' ' + (b.startTime || '00:00'));
     return da - db;
@@ -37,7 +37,11 @@ function formatDate(dateStr) {
   if (!dateStr) return '';
   const d = new Date(dateStr + 'T00:00:00');
   if (isNaN(d)) return dateStr;
-  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  return d.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  });
 }
 
 function formatDateShort(dateStr) {
@@ -73,19 +77,12 @@ function formatTime(timeStr) {
 
 function getBaseWorkerUrl() {
   const { origin, pathname } = window.location;
-
-  // Strip off index.html if it's there
   let basePath = pathname.replace(/index\.html$/, '');
-
-  // Strip trailing slash
   basePath = basePath.replace(/\/$/, '');
-
-  // Point to worker.html in the same folder
   return `${origin}${basePath}/worker.html`;
 }
 
-
-/* ========== Assignments Helpers ========== */
+/* ========== Assignment / Phase Helpers ========== */
 function getAssignments(job) {
   if (!job.assignments || !Array.isArray(job.assignments)) {
     const baseIds = job.assignedWorkerIds || [];
@@ -113,7 +110,7 @@ function getJobPhase(job) {
   return '';
 }
 
-/* ========== Parser for Auto-Fill Job ========== */
+/* ========== Auto-Fill Parser ========== */
 function normalizeTimeToInput(str) {
   if (!str) return '';
   const s = str.trim().toLowerCase();
@@ -138,12 +135,20 @@ function parseJobText(raw) {
 
   const segments = line.split(/[-–]/).map((s) => s.trim()).filter(Boolean);
 
-  const result = { name: '', date: '', startTime: '', endTime: '', booth: '', location: '', phase: '' };
+  const result = {
+    name: '',
+    date: '',
+    startTime: '',
+    endTime: '',
+    booth: '',
+    location: '',
+    phase: ''
+  };
 
-  // 1) Job name
+  // Name
   if (segments[0]) result.name = segments[0];
 
-  // 2) Date: 11/12 or 11-12 or 11/12/2025
+  // Date segment like 11/12 or 11-12-2025
   const dateSeg = segments.find((s) => /\d{1,2}[\/\-]\d{1,2}/.test(s));
   if (dateSeg) {
     const m = dateSeg.match(/(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/);
@@ -152,17 +157,25 @@ function parseJobText(raw) {
       const day = parseInt(m[2], 10);
       let year = m[3] ? parseInt(m[3], 10) : new Date().getFullYear();
       if (year < 100) year += 2000;
-      result.date = String(year) + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+      result.date =
+        String(year) +
+        '-' +
+        String(month).padStart(2, '0') +
+        '-' +
+        String(day).padStart(2, '0');
     }
   }
 
-  // 3) Time range
-  function isTimeLike(str) { return /(\d{1,2})(?::\d{2})?\s*(am|pm)?/i.test(str || ''); }
+  // Time range
+  function isTimeLike(str) {
+    return /(\d{1,2})(?::\d{2})?\s*(am|pm)?/i.test(str || '');
+  }
 
   let timeIndex = segments.findIndex((s) => isTimeLike(s));
   if (timeIndex !== -1) {
     let startStr = segments[timeIndex];
     let endStr = '';
+
     if (/[to–-]/i.test(startStr)) {
       const parts = startStr.split(/to|–|-/i).map((s) => s.trim()).filter(Boolean);
       startStr = parts[0] || '';
@@ -171,37 +184,54 @@ function parseJobText(raw) {
       const next = segments[timeIndex + 1];
       if (next && isTimeLike(next)) endStr = next;
     }
+
     if (startStr) result.startTime = normalizeTimeToInput(startStr);
     if (endStr) result.endTime = normalizeTimeToInput(endStr);
   }
 
-  // 4) Booth
+  // Booth
   const boothSeg = segments.find((s) => /booth/i.test(s));
   if (boothSeg) {
     const m = boothSeg.match(/booth\s*([a-z0-9\-]+)/i);
     result.booth = m ? m[1] : boothSeg;
   }
 
-  // 5) Location: last segment if several
+  // Location guess: last segment
   if (segments.length >= 3) result.location = segments[segments.length - 1];
 
-  // 6) Phase guess
+  // Phase guess
   const lowerAll = raw.toLowerCase();
-  if (lowerAll.includes('dismantle') || lowerAll.includes('tear down') || lowerAll.includes('teardown') || lowerAll.includes('strike')) {
+  if (
+    lowerAll.includes('dismantle') ||
+    lowerAll.includes('tear down') ||
+    lowerAll.includes('teardown') ||
+    lowerAll.includes('strike')
+  ) {
     result.phase = 'Dismantle';
-  } else if (lowerAll.includes('assist') || lowerAll.includes('support') || lowerAll.includes('standby')) {
+  } else if (
+    lowerAll.includes('assist') ||
+    lowerAll.includes('support') ||
+    lowerAll.includes('standby')
+  ) {
     result.phase = 'Assist';
-  } else if (lowerAll.includes('build') || lowerAll.includes('install') || lowerAll.includes('setup')) {
+  } else if (
+    lowerAll.includes('build') ||
+    lowerAll.includes('install') ||
+    lowerAll.includes('setup')
+  ) {
     result.phase = 'Build';
   }
 
   return result;
 }
 
-/* ========== Renderers ========== */
+/* ========== Workers Rendering ========== */
 function renderAssignWorkers(data) {
   const container = document.getElementById('assign-workers');
+  if (!container) return;
+
   container.innerHTML = '';
+
   if (!data.workers.length) {
     const span = document.createElement('span');
     span.className = 'muted';
@@ -209,6 +239,7 @@ function renderAssignWorkers(data) {
     container.appendChild(span);
     return;
   }
+
   data.workers.forEach((w) => {
     const label = document.createElement('label');
     const checkbox = document.createElement('input');
@@ -223,6 +254,7 @@ function renderAssignWorkers(data) {
 function renderWorkersTable(data) {
   const table = document.getElementById('workers-table');
   if (!table) return;
+
   table.innerHTML = '';
 
   if (!data.workers.length) {
@@ -273,7 +305,6 @@ function renderWorkersTable(data) {
       });
       saveData(data);
       if (window._crewtechRerenderAll) window._crewtechRerenderAll();
-      else { renderAssignWorkers(data); renderWorkersTable(data); renderJobsTable(data); renderOverview(data); }
     });
 
     actionsTd.appendChild(delBtn);
@@ -282,77 +313,15 @@ function renderWorkersTable(data) {
   });
 }
 
-function renderOverview(data) {
-  const nextContainer = document.getElementById('next-jobs');
-  if (!nextContainer) return;
-  nextContainer.innerHTML = '';
-
-  const today = new Date(); today.setHours(0,0,0,0);
-
-  const upcoming = sortJobsByDateTime(data.jobs).filter((job) => {
-    if (!job.date) return false;
-    const d = new Date(job.date + 'T00:00:00');
-    return !isNaN(d) && d >= today;
-  });
-
-  const showJobs = (target, jobs) => {
-    if (!jobs.length) {
-      const p = document.createElement('p');
-      p.className = 'muted';
-      p.textContent = 'No upcoming jobs yet.';
-      target.appendChild(p);
-      return;
-    }
-
-    jobs.forEach((job) => {
-      const card = document.createElement('div');
-      card.className = 'job-card';
-
-      const title = document.createElement('div');
-      title.className = 'job-card-title';
-      title.textContent = job.name || '(no name)';
-      card.appendChild(title);
-
-      const meta = document.createElement('div');
-      meta.className = 'job-card-meta';
-      const bits = [];
-      if (job.date) bits.push(formatDate(job.date));
-      if (job.startTime || job.endTime) {
-        bits.push([job.startTime, job.endTime].filter(Boolean).map(formatTime).join(' – '));
-      }
-      if (job.booth) bits.push('Booth ' + job.booth);
-      if (job.location) bits.push(job.location);
-      meta.textContent = bits.join(' • ');
-      card.appendChild(meta);
-
-      const assignments = getAssignments(job);
-      const ids = assignments.map((a) => a.workerId);
-      if (ids.length) {
-        const workersDiv = document.createElement('div');
-        workersDiv.className = 'job-card-workers';
-        const names = assignments
-          .map((a) => {
-            const w = data.workers.find((w) => w.id === a.workerId);
-            if (!w) return null;
-            const abbrev = shortStatus(a.status);
-            return abbrev ? `${w.name} (${abbrev})` : w.name;
-          })
-          .filter(Boolean);
-        workersDiv.textContent = 'Workers: ' + names.join(', ');
-        card.appendChild(workersDiv);
-      }
-
-      target.appendChild(card);
-    });
-  };
-
-  showJobs(nextContainer, upcoming.slice(0, 3));
-}
-
+/* ========== Job Summary Helpers ========== */
 function buildWorkerSummary(job, data) {
   const assignments = getAssignments(job);
   if (!assignments.length) return '0 workers';
-  let confirmed = 0, invited = 0, declined = 0, other = 0;
+
+  let confirmed = 0,
+    invited = 0,
+    declined = 0,
+    other = 0;
   assignments.forEach((a) => {
     const s = (a.status || '').toLowerCase();
     if (s === 'confirmed') confirmed++;
@@ -360,37 +329,45 @@ function buildWorkerSummary(job, data) {
     else if (s === 'declined') declined++;
     else other++;
   });
+
   const parts = [];
   if (confirmed) parts.push(`${confirmed} C`);
   if (invited) parts.push(`${invited} I`);
   if (declined) parts.push(`${declined} D`);
   if (other) parts.push(`${other} ?`);
-  return `${assignments.length} worker${assignments.length > 1 ? 's' : ''}` + (parts.length ? ` (${parts.join(', ')})` : '');
+
+  return (
+    `${assignments.length} worker${assignments.length > 1 ? 's' : ''}` +
+    (parts.length ? ` (${parts.join(', ')})` : '')
+  );
 }
 
-function renderJobsTable(data) {
-  const container = document.getElementById('jobs-table');
+/* ========== Shared Renderer for Month-Grouped Job Lists ========== */
+function renderJobGroups(container, jobs, data, options = {}) {
+  if (!container) return;
   container.innerHTML = '';
 
-  if (!data.jobs.length) {
+  const list = sortJobsByDateTime(jobs || []);
+  if (!list.length) {
     const p = document.createElement('p');
     p.className = 'muted';
-    p.textContent = 'No jobs yet.';
+    p.textContent = options.emptyText || 'No jobs yet.';
     container.appendChild(p);
     return;
   }
 
-  const jobsSorted = sortJobsByDateTime(data.jobs);
   const groups = {};
-  jobsSorted.forEach((job) => {
+  list.forEach((job) => {
     const key = getMonthKey(job.date);
     if (!groups[key]) groups[key] = [];
     groups[key].push(job);
   });
+
   const keys = Object.keys(groups).sort();
 
   const today = new Date();
-  const currentKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+  const currentKey =
+    today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
 
   keys.forEach((key) => {
     const monthGroup = document.createElement('div');
@@ -410,11 +387,13 @@ function renderJobsTable(data) {
 
     const count = document.createElement('div');
     count.className = 'month-count';
-    count.textContent = groups[key].length + ' job' + (groups[key].length > 1 ? 's' : '');
+    count.textContent =
+      groups[key].length + ' job' + (groups[key].length > 1 ? 's' : '');
 
     const arrow = document.createElement('div');
     arrow.className = 'month-arrow';
-    arrow.textContent = key === currentKey ? '▾' : '▸';
+    arrow.textContent =
+      key === currentKey && !options.startCollapsed ? '▾' : '▸';
 
     right.appendChild(count);
     right.appendChild(arrow);
@@ -424,7 +403,8 @@ function renderJobsTable(data) {
 
     const body = document.createElement('div');
     body.className = 'month-body';
-    body.style.display = key === currentKey ? 'block' : 'none';
+    body.style.display =
+      key === currentKey && !options.startCollapsed ? 'block' : 'none';
 
     header.addEventListener('click', () => {
       const isOpen = body.style.display !== 'none';
@@ -470,7 +450,11 @@ function renderJobsTable(data) {
       const metaLine = document.createElement('div');
       metaLine.className = 'job-row-meta';
 
-      const timeText = [job.startTime, job.endTime].filter(Boolean).map(formatTime).join(' – ');
+      const timeText = [job.startTime, job.endTime]
+        .filter(Boolean)
+        .map(formatTime)
+        .join(' – ');
+
       if (timeText) {
         const timeSpan = document.createElement('span');
         timeSpan.textContent = timeText;
@@ -491,6 +475,14 @@ function renderJobsTable(data) {
       workersSummary.textContent = buildWorkerSummary(job, data);
       metaLine.appendChild(workersSummary);
 
+      // If report completed, show a tiny tag
+      if (job.reportCompleted) {
+        const doneSpan = document.createElement('span');
+        doneSpan.className = 'job-row-finalized-tag';
+        doneSpan.textContent = 'Finalized';
+        metaLine.appendChild(doneSpan);
+      }
+
       main.appendChild(metaLine);
 
       const arrowRow = document.createElement('div');
@@ -508,20 +500,30 @@ function renderJobsTable(data) {
       grid.className = 'job-details-grid';
 
       const dateBlock = document.createElement('div');
-      dateBlock.innerHTML = '<div class="job-details-label">Date</div>' + `<div class="job-details-value">${job.date ? formatDate(job.date) : '-'}</div>`;
+      dateBlock.innerHTML =
+        '<div class="job-details-label">Date</div>' +
+        `<div class="job-details-value">${
+          job.date ? formatDate(job.date) : '-'
+        }</div>`;
       grid.appendChild(dateBlock);
 
       const timeBlock = document.createElement('div');
       const timeFull = timeText || '-';
-      timeBlock.innerHTML = '<div class="job-details-label">Time</div>' + `<div class="job-details-value">${timeFull}</div>`;
+      timeBlock.innerHTML =
+        '<div class="job-details-label">Time</div>' +
+        `<div class="job-details-value">${timeFull}</div>`;
       grid.appendChild(timeBlock);
 
       const boothBlock = document.createElement('div');
-      boothBlock.innerHTML = '<div class="job-details-label">Booth</div>' + `<div class="job-details-value">${job.booth || '-'}</div>`;
+      boothBlock.innerHTML =
+        '<div class="job-details-label">Booth</div>' +
+        `<div class="job-details-value">${job.booth || '-'}</div>`;
       grid.appendChild(boothBlock);
 
       const locBlock = document.createElement('div');
-      locBlock.innerHTML = '<div class="job-details-label">Location</div>' + `<div class="job-details-value">${job.location || '-'}</div>`;
+      locBlock.innerHTML =
+        '<div class="job-details-label">Location</div>' +
+        `<div class="job-details-value">${job.location || '-'}</div>`;
       grid.appendChild(locBlock);
 
       details.appendChild(grid);
@@ -529,17 +531,22 @@ function renderJobsTable(data) {
       if (job.notes) {
         const notesBlock = document.createElement('div');
         notesBlock.className = 'job-notes-block';
-        notesBlock.innerHTML = '<div class="job-details-label">Notes</div>' + `<div class="job-details-value">${job.notes}</div>`;
+        notesBlock.innerHTML =
+          '<div class="job-details-label">Notes</div>' +
+          `<div class="job-details-value">${job.notes}</div>`;
         details.appendChild(notesBlock);
       }
 
       if (job.rawText) {
         const rawBlock = document.createElement('div');
         rawBlock.className = 'job-notes-block';
-        rawBlock.innerHTML = '<div class="job-details-label">Raw text</div>' + `<div class="job-details-value">${job.rawText}</div>`;
+        rawBlock.innerHTML =
+          '<div class="job-details-label">Raw text</div>' +
+          `<div class="job-details-value">${job.rawText}</div>`;
         details.appendChild(rawBlock);
       }
 
+      // Workers & status pills
       const workersBlock = document.createElement('div');
       workersBlock.className = 'job-workers-block';
 
@@ -582,11 +589,12 @@ function renderJobsTable(data) {
             if (current === opt.value) pill.classList.add('active');
             pill.textContent = opt.label;
 
-            pill.addEventListener('click', () => {
+            pill.addEventListener('click', (e) => {
+              e.stopPropagation();
               assignment.status = opt.value;
               job.assignedWorkerIds = job.assignments.map((a) => a.workerId);
               saveData(data);
-              rerenderAll();
+              if (window._crewtechRerenderAll) window._crewtechRerenderAll();
             });
 
             pills.appendChild(pill);
@@ -599,10 +607,10 @@ function renderJobsTable(data) {
 
       details.appendChild(workersBlock);
 
-            const actions = document.createElement('div');
+      // Actions row
+      const actions = document.createElement('div');
       actions.className = 'job-actions';
 
-      // --- Send SMS Invites button ---
       const smsBtn = document.createElement('button');
       smsBtn.className = 'small secondary';
       smsBtn.textContent = 'Send SMS Invites';
@@ -610,7 +618,6 @@ function renderJobsTable(data) {
       smsBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
 
-        // Get assigned workers that actually have phone numbers
         const workersWithPhones = getAssignments(job)
           .map((a) => data.workers.find((w) => w.id === a.workerId))
           .filter((w) => w && w.phone);
@@ -620,7 +627,11 @@ function renderJobsTable(data) {
           return;
         }
 
-        if (!confirm(`Send SMS invites to ${workersWithPhones.length} worker(s)?`)) {
+        if (
+          !confirm(
+            `Send SMS invites to ${workersWithPhones.length} worker(s)?`
+          )
+        ) {
           return;
         }
 
@@ -634,7 +645,11 @@ function renderJobsTable(data) {
         for (const w of workersWithPhones) {
           const workerLink = `${base}?workerId=${encodeURIComponent(w.id)}`;
 
-          const msg = `CrewTech: ${job.name || 'Job'} on ${job.date || ''} ${job.startTime || ''}-${job.endTime || ''}. View details & confirm: ${workerLink}`;
+          const msg = `CrewTech: ${
+            job.name || 'Job'
+          } on ${job.date || ''} ${job.startTime || ''}-${
+            job.endTime || ''
+          }. View details & confirm: ${workerLink}`;
 
           try {
             const res = await fetch('/.netlify/functions/sendSMS', {
@@ -660,13 +675,14 @@ function renderJobsTable(data) {
         smsBtn.textContent = originalLabel;
 
         if (failures) {
-          alert(`SMS sent with ${failures} error(s). Check Netlify function logs for details.`);
+          alert(
+            `SMS sent with ${failures} error(s). Check Netlify function logs for details.`
+          );
         } else {
           alert('SMS invites sent!');
         }
       });
 
-      // --- Delete job button, same as before ---
       const deleteBtn = document.createElement('button');
       deleteBtn.className = 'danger small';
       deleteBtn.textContent = 'Delete job';
@@ -677,13 +693,11 @@ function renderJobsTable(data) {
         data.jobs = data.jobs.filter((j) => j.id !== job.id);
         saveData(data);
         if (window._crewtechRerenderAll) window._crewtechRerenderAll();
-        else { renderJobsTable(data); renderOverview(data); }
       });
 
       actions.appendChild(smsBtn);
       actions.appendChild(deleteBtn);
       details.appendChild(actions);
-
 
       let open = false;
       headerRow.addEventListener('click', () => {
@@ -703,7 +717,108 @@ function renderJobsTable(data) {
   });
 }
 
-/* ========== CSV Export ========== */
+/* ========== Upcoming Jobs – Mini & Full ========== */
+function renderUpcomingMini(data, maxCount = 5) {
+  const container = document.getElementById('next-jobs');
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const upcoming = sortJobsByDateTime(data.jobs).filter((job) => {
+    if (!job.date) return false;
+    const d = new Date(job.date + 'T00:00:00');
+    return !isNaN(d) && d >= today;
+  });
+
+  if (!upcoming.length) {
+    const p = document.createElement('p');
+    p.className = 'muted';
+    p.textContent = 'No upcoming jobs yet.';
+    container.appendChild(p);
+    return;
+  }
+
+  upcoming.slice(0, maxCount).forEach((job) => {
+    const card = document.createElement('div');
+    card.className = 'job-card';
+
+    const title = document.createElement('div');
+    title.className = 'job-card-title';
+    title.textContent = job.name || '(no name)';
+    card.appendChild(title);
+
+    const meta = document.createElement('div');
+    meta.className = 'job-card-meta';
+    const bits = [];
+    if (job.date) bits.push(formatDate(job.date));
+    if (job.startTime || job.endTime) {
+      bits.push(
+        [job.startTime, job.endTime]
+          .filter(Boolean)
+          .map(formatTime)
+          .join(' – ')
+      );
+    }
+    if (job.booth) bits.push('Booth ' + job.booth);
+    if (job.location) bits.push(job.location);
+    meta.textContent = bits.join(' • ');
+    card.appendChild(meta);
+
+    const assignments = getAssignments(job);
+    if (assignments.length) {
+      const workersDiv = document.createElement('div');
+      workersDiv.className = 'job-card-workers';
+      const names = assignments
+        .map((a) => {
+          const w = data.workers.find((ww) => ww.id === a.workerId);
+          if (!w) return null;
+          const abbrev = shortStatus(a.status);
+          return abbrev ? `${w.name} (${abbrev})` : w.name;
+        })
+        .filter(Boolean);
+      workersDiv.textContent = 'Workers: ' + names.join(', ');
+      card.appendChild(workersDiv);
+    }
+
+    container.appendChild(card);
+  });
+}
+
+function renderUpcomingFull(data) {
+  const container = document.getElementById('jobs-upcoming-table');
+  if (!container) return;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const futureJobs = (data.jobs || []).filter((job) => {
+    if (!job.date) return false;
+    const d = new Date(job.date + 'T00:00:00');
+    return !isNaN(d) && d >= today;
+  });
+
+  renderJobGroups(container, futureJobs, data, {
+    emptyText: 'No future jobs yet.',
+    startCollapsed: false
+  });
+}
+
+/* ========== Completed Jobs (uses reportCompleted flag) ========== */
+function renderCompletedJobs(data) {
+  const container = document.getElementById('jobs-completed-table');
+  if (!container) return;
+
+  const completedJobs = (data.jobs || []).filter((job) => job.reportCompleted);
+  renderJobGroups(container, completedJobs, data, {
+    emptyText: 'No completed jobs yet.',
+    startCollapsed: true
+  });
+}
+
+/* ========== CSV Export (global jobs list) ========== */
 function exportCsv(data) {
   if (!data.jobs.length) {
     alert('No jobs to export yet.');
@@ -711,7 +826,18 @@ function exportCsv(data) {
   }
 
   const lines = [];
-  lines.push(['Job Name', 'Date', 'Start', 'End', 'Booth', 'Location', 'Phase', 'Assignments'].join(','));
+  lines.push(
+    [
+      'Job Name',
+      'Date',
+      'Start',
+      'End',
+      'Booth',
+      'Location',
+      'Phase',
+      'Assignments'
+    ].join(',')
+  );
 
   data.jobs.forEach((job) => {
     const assignments = getAssignments(job);
@@ -738,7 +864,9 @@ function exportCsv(data) {
     lines.push(row.join(','));
   });
 
-  const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const blob = new Blob([lines.join('\n')], {
+    type: 'text/csv;charset=utf-8;'
+  });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -754,7 +882,7 @@ function setBackupStatus(message, isError = false) {
   const el = document.getElementById('backup-status');
   if (!el) return;
   el.textContent = message || '';
-  el.style.color = isError ? '#b91c1c' : '#6b7280';
+  el.style.color = isError ? '#b91c1c' : '#fed7aa';
 }
 
 function exportBackupJson(data) {
@@ -762,7 +890,12 @@ function exportBackupJson(data) {
     const workers = Array.isArray(data.workers) ? data.workers : [];
     const jobs = Array.isArray(data.jobs) ? data.jobs : [];
 
-    const backup = { version: 1, createdAt: new Date().toISOString(), workers, jobs };
+    const backup = {
+      version: 1,
+      createdAt: new Date().toISOString(),
+      workers,
+      jobs
+    };
     const json = JSON.stringify(backup, null, 2);
 
     const now = new Date();
@@ -771,18 +904,26 @@ function exportBackupJson(data) {
     const dd = String(now.getDate()).padStart(2, '0');
     const filename = `crewtech-backup-${yyyy}-${mm}-${dd}.json`;
 
-    const blob = new Blob([json], { type: 'application/json;charset=utf-8;' });
+    const blob = new Blob([json], {
+      type: 'application/json;charset=utf-8;'
+    });
     const url = URL.createObjectURL(blob);
 
     const a = document.createElement('a');
-    a.href = url; a.download = filename;
-    document.body.appendChild(a); a.click();
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
     const workerCount = workers.length;
     const jobCount = jobs.length;
-    setBackupStatus(`Backup downloaded (${workerCount} worker${workerCount === 1 ? '' : 's'}, ${jobCount} job${jobCount === 1 ? '' : 's'}).`);
+    setBackupStatus(
+      `Backup downloaded (${workerCount} worker${
+        workerCount === 1 ? '' : 's'
+      }, ${jobCount} job${jobCount === 1 ? '' : 's'}).`
+    );
   } catch (err) {
     console.error('Error creating backup JSON:', err);
     setBackupStatus('Error creating backup file.', true);
@@ -798,7 +939,8 @@ function importBackupFromFile(file, data, rerenderAll) {
     try {
       const text = event.target.result;
       const backup = JSON.parse(text);
-      if (!backup || typeof backup !== 'object') throw new Error('Backup file is not a valid JSON object.');
+      if (!backup || typeof backup !== 'object')
+        throw new Error('Backup file is not a valid JSON object.');
 
       const workers = Array.isArray(backup.workers) ? backup.workers : [];
       const jobs = Array.isArray(backup.jobs) ? backup.jobs : [];
@@ -807,16 +949,27 @@ function importBackupFromFile(file, data, rerenderAll) {
       const jobCount = jobs.length;
 
       const ok = confirm(
-        `Restore backup with ${workerCount} worker${workerCount === 1 ? '' : 's'} and ${jobCount} job${jobCount === 1 ? '' : 's'}?\n\nThis will replace the current data on this device.`
+        `Restore backup with ${workerCount} worker${
+          workerCount === 1 ? '' : 's'
+        } and ${jobCount} job${
+          jobCount === 1 ? '' : 's'
+        }?\n\nThis will replace the current data on this device.`
       );
-      if (!ok) { setBackupStatus('Restore cancelled.'); return; }
+      if (!ok) {
+        setBackupStatus('Restore cancelled.');
+        return;
+      }
 
       data.workers = workers;
       data.jobs = jobs;
       saveData(data);
       rerenderAll();
 
-      setBackupStatus(`Restored ${workerCount} worker${workerCount === 1 ? '' : 's'} and ${jobCount} job${jobCount === 1 ? '' : 's'} from backup.`);
+      setBackupStatus(
+        `Restored ${workerCount} worker${
+          workerCount === 1 ? '' : 's'
+        } and ${jobCount} job${jobCount === 1 ? '' : 's'} from backup.`
+      );
     } catch (err) {
       console.error('Error restoring from backup:', err);
       setBackupStatus('Error restoring from backup file.', true);
@@ -840,7 +993,10 @@ function setWorkersCloudStatus(message, isError = false) {
 }
 
 async function saveWorkersToCloud(workers) {
-  if (!WORKERS_CLOUD_URL) { alert('Cloud URL is not set in the app.'); return; }
+  if (!WORKERS_CLOUD_URL) {
+    alert('Cloud URL is not set in the app.');
+    return;
+  }
   try {
     setWorkersCloudStatus('Saving workers to cloud...');
     const payload = { workers: workers || [] };
@@ -850,9 +1006,11 @@ async function saveWorkersToCloud(workers) {
       body: JSON.stringify(payload)
     });
     const text = await response.text();
-    if (!response.ok) throw new Error(text || ('HTTP ' + response.status));
+    if (!response.ok) throw new Error(text || 'HTTP ' + response.status);
     const count = payload.workers.length || 0;
-    setWorkersCloudStatus(`Saved ${count} worker${count === 1 ? '' : 's'} to cloud.`);
+    setWorkersCloudStatus(
+      `Saved ${count} worker${count === 1 ? '' : 's'} to cloud.`
+    );
   } catch (err) {
     console.error('Error saving workers to cloud:', err);
     setWorkersCloudStatus('Error saving workers to cloud.', true);
@@ -861,18 +1019,23 @@ async function saveWorkersToCloud(workers) {
 }
 
 async function loadWorkersFromCloud() {
-  if (!WORKERS_CLOUD_URL) { alert('Cloud URL is not set in the app.'); return []; }
+  if (!WORKERS_CLOUD_URL) {
+    alert('Cloud URL is not set in the app.');
+    return [];
+  }
   try {
     setWorkersCloudStatus('Loading workers from cloud...');
     const response = await fetch(WORKERS_CLOUD_URL, { method: 'GET' });
     if (!response.ok) {
       const text = await response.text();
-      throw new Error(text || ('HTTP ' + response.status));
+      throw new Error(text || 'HTTP ' + response.status);
     }
     const json = await response.json();
     const workersFromCloud = json.workers || [];
     const count = workersFromCloud.length || 0;
-    setWorkersCloudStatus(`Loaded ${count} worker${count === 1 ? '' : 's'} from cloud.`);
+    setWorkersCloudStatus(
+      `Loaded ${count} worker${count === 1 ? '' : 's'} from cloud.`
+    );
     return workersFromCloud;
   } catch (err) {
     console.error('Error loading workers from cloud:', err);
@@ -887,48 +1050,58 @@ document.addEventListener('DOMContentLoaded', () => {
   let data = loadData();
 
   const workersList = document.getElementById('workers-list');
-  const showWorkersBtn = document.getElementById('show-workers-btn'); // may or may not exist
-  const workersToggle = document.getElementById('workers-toggle');    // header with caret
-
   const resetDataBtn = document.getElementById('reset-data-btn'); // optional
   const addWorkerBtn = document.getElementById('add-worker-btn');
   const addJobBtn = document.getElementById('add-job-btn');
   const exportCsvBtn = document.getElementById('export-csv-btn'); // optional
-  const seeAllJobsBtn = document.getElementById('see-all-jobs-btn');
-  const allJobsSection = document.getElementById('all-jobs-section');
-
-  // Helper: open/close Workers list + sync caret and button label
-  function setWorkersOpen(isOpen) {
-    if (workersList) {
-      workersList.style.display = isOpen ? 'block' : 'none';
-    }
-    if (workersToggle) {
-      workersToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-      const caret = workersToggle.querySelector('.caret');
-      if (caret) caret.textContent = isOpen ? '▾' : '▸';
-    }
-    if (showWorkersBtn) {
-      showWorkersBtn.textContent = isOpen ? 'Hide list' : 'Show list';
-    }
-  }
-
-  // Scroll "See All Jobs" to the All Jobs section
-  if (seeAllJobsBtn && allJobsSection) {
-    seeAllJobsBtn.addEventListener('click', () => {
-      allJobsSection.setAttribute('tabindex', '-1'); // a11y focus target
-      allJobsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      allJobsSection.focus({ preventScroll: true });
-      setTimeout(() => allJobsSection.removeAttribute('tabindex'), 300);
-    });
-  }
 
   const addJobToggle = document.getElementById('add-job-toggle');
-  const addJobBody   = document.getElementById('add-job-body');
 
+  const workersSection = document.getElementById('workers-section');
+  const workersToggle = document.getElementById('workers-toggle');
+  const workersBody = document.getElementById('workers-body');
+
+  const upcomingToggle = document.getElementById('upcoming-jobs-toggle');
+  const upcomingBody = document.getElementById('upcoming-jobs-body');
+  const upcomingSeeAllBtn = document.getElementById('upcoming-see-all-btn');
+  const upcomingJobsFull = document.getElementById('upcoming-jobs-full');
+
+  const completedToggle = document.getElementById('completed-jobs-toggle');
+  const completedBody = document.getElementById('completed-jobs-body');
+
+  const finalizeToggle = document.getElementById('finalize-toggle');
+  const finalizeBody = document.getElementById('finalize-body');
+
+  const finalizeJobSelect = document.getElementById('finalize-job-select');
+  const finalizeWorkersContainer = document.getElementById('finalize-workers-container');
+  const finalizeNotes = document.getElementById('finalize-notes');
+  const finalizeExportBtn = document.getElementById('finalize-export-btn');
+  const finalizeCompleteBtn = document.getElementById('finalize-complete-btn');
+  const finalizeDownloadLink = document.getElementById('finalize-download-link');
+
+  const toggleInlineWorkerBtn = document.getElementById('toggle-inline-worker');
+  const inlineWorkerForm = document.getElementById('inline-worker-form');
+  const inlineWorkerNameInput = document.getElementById('inline-worker-name');
+  const inlineWorkerPhoneInput = document.getElementById('inline-worker-phone');
+  const inlineAddWorkerBtn = document.getElementById('inline-add-worker-btn');
+
+  const autoFillBtn = document.getElementById('auto-fill-btn');
+
+  const backupDownloadLink = document.getElementById('backup-download-link');
+  const backupRestoreLink = document.getElementById('backup-restore-link');
+  const backupFileInput = document.getElementById('backup-file-input');
+
+  const workersLoadCloudBtn = document.getElementById('workers-load-cloud-btn');
+  const workersSaveCloudBtn = document.getElementById('workers-save-cloud-btn');
+
+  /* ---- Collapses ---- */
   function setAddJobOpen(isOpen) {
-    if (!addJobToggle || !addJobBody) return;
+    if (!addJobToggle) return;
+    const fullBody = document.getElementById('add-job-full-body');
     addJobToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-    addJobBody.style.display = isOpen ? 'block' : 'none';
+    if (fullBody) fullBody.style.display = isOpen ? 'block' : 'none';
+    const caret = addJobToggle.querySelector('.caret');
+    if (caret) caret.textContent = isOpen ? '▾' : '▸';
   }
 
   if (addJobToggle) {
@@ -946,50 +1119,200 @@ document.addEventListener('DOMContentLoaded', () => {
     setAddJobOpen(false);
   }
 
-  // Workers section: make the "Workers" title + caret clickable
-  if (workersToggle && workersList) {
-    workersToggle.addEventListener('click', () => {
-      const isOpen = workersList.style.display !== 'none';
-      setWorkersOpen(!isOpen);
-    });
+  function setWorkersOpen(isOpen) {
+    if (!workersToggle || !workersBody) return;
+    workersToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    workersBody.style.display = isOpen ? 'block' : 'none';
+    const caret = workersToggle.querySelector('.caret');
+    if (caret) caret.textContent = isOpen ? '▾' : '▸';
+    if (workersList) workersList.style.display = isOpen ? 'block' : 'none';
+  }
 
+  if (workersToggle) {
+    workersToggle.addEventListener('click', () => {
+      const open = workersToggle.getAttribute('aria-expanded') === 'true';
+      setWorkersOpen(!open);
+    });
     workersToggle.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        const isOpen = workersList.style.display !== 'none';
-        setWorkersOpen(!isOpen);
+        const open = workersToggle.getAttribute('aria-expanded') === 'true';
+        setWorkersOpen(!open);
       }
     });
-
-    // Start collapsed by default
     setWorkersOpen(false);
   }
 
-  const autoFillBtn = document.getElementById('auto-fill-btn');
-
-  // Backup elements
-  const backupDownloadLink = document.getElementById('backup-download-link');
-  const backupRestoreLink = document.getElementById('backup-restore-link');
-  const backupFileInput = document.getElementById('backup-file-input');
-
-  function rerenderAll() {
-    data.jobs.forEach((job) => getAssignments(job));
-    saveData(data);
-    renderAssignWorkers(data);
-    renderWorkersTable(data);
-    renderJobsTable(data);
-    renderOverview(data);
+  function setUpcomingOpen(isOpen) {
+    if (!upcomingToggle || !upcomingBody) return;
+    upcomingToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    upcomingBody.style.display = isOpen ? 'block' : 'none';
+    const caret = upcomingToggle.querySelector('.caret');
+    if (caret) caret.textContent = isOpen ? '▾' : '▸';
   }
 
-  rerenderAll();
-  window._crewtechRerenderAll = rerenderAll;
+  if (upcomingToggle) {
+    upcomingToggle.addEventListener('click', () => {
+      const open = upcomingToggle.getAttribute('aria-expanded') === 'true';
+      setUpcomingOpen(!open);
+    });
+    upcomingToggle.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const open = upcomingToggle.getAttribute('aria-expanded') === 'true';
+        setUpcomingOpen(!open);
+      }
+    });
+    setUpcomingOpen(false);
+  }
 
-  /* Backup: Download full JSON backup */
+  function setCompletedOpen(isOpen) {
+    if (!completedToggle || !completedBody) return;
+    completedToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    completedBody.style.display = isOpen ? 'block' : 'none';
+    const caret = completedToggle.querySelector('.caret');
+    if (caret) caret.textContent = isOpen ? '▾' : '▸';
+  }
+
+  if (completedToggle) {
+    completedToggle.addEventListener('click', () => {
+      const open = completedToggle.getAttribute('aria-expanded') === 'true';
+      setCompletedOpen(!open);
+    });
+    completedToggle.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const open = completedToggle.getAttribute('aria-expanded') === 'true';
+        setCompletedOpen(!open);
+      }
+    });
+    setCompletedOpen(false);
+  }
+
+  function setFinalizeOpen(isOpen) {
+    if (!finalizeToggle || !finalizeBody) return;
+    finalizeToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    finalizeBody.style.display = isOpen ? 'block' : 'none';
+    const caret = finalizeToggle.querySelector('.caret');
+    if (caret) caret.textContent = isOpen ? '▾' : '▸';
+  }
+
+  if (finalizeToggle) {
+    finalizeToggle.addEventListener('click', () => {
+      const open = finalizeToggle.getAttribute('aria-expanded') === 'true';
+      setFinalizeOpen(!open);
+    });
+    finalizeToggle.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const open = finalizeToggle.getAttribute('aria-expanded') === 'true';
+        setFinalizeOpen(!open);
+      }
+    });
+    setFinalizeOpen(false);
+  }
+
+  if (upcomingSeeAllBtn && upcomingJobsFull) {
+    upcomingSeeAllBtn.addEventListener('click', () => {
+      const isOpen = upcomingJobsFull.style.display !== 'none';
+      const nowOpen = !isOpen;
+      upcomingJobsFull.style.display = nowOpen ? 'block' : 'none';
+      upcomingSeeAllBtn.setAttribute('aria-expanded', nowOpen ? 'true' : 'false');
+      const caret = upcomingSeeAllBtn.querySelector('.caret');
+      if (caret) caret.textContent = nowOpen ? '▾' : '▸';
+    });
+  }
+
+  /* ---- Inline "Add new worker" inside Add Job ---- */
+  if (toggleInlineWorkerBtn && inlineWorkerForm) {
+    toggleInlineWorkerBtn.addEventListener('click', () => {
+      const isHidden =
+        inlineWorkerForm.style.display === 'none' ||
+        !inlineWorkerForm.style.display;
+      inlineWorkerForm.style.display = isHidden ? 'block' : 'none';
+    });
+  }
+
+  if (inlineAddWorkerBtn && inlineWorkerNameInput && inlineWorkerPhoneInput) {
+    inlineAddWorkerBtn.addEventListener('click', () => {
+      const name = inlineWorkerNameInput.value.trim();
+      const phone = inlineWorkerPhoneInput.value.trim();
+      if (!name) {
+        alert('Enter a worker name.');
+        return;
+      }
+      const newWorker = { id: generateId('w'), name, phone };
+      data.workers.push(newWorker);
+      saveData(data);
+      inlineWorkerNameInput.value = '';
+      inlineWorkerPhoneInput.value = '';
+      rerenderAll();
+
+      setTimeout(() => {
+        const assignContainer = document.getElementById('assign-workers');
+        if (!assignContainer) return;
+        const cb =
+          assignContainer.querySelector(
+            `input[type="checkbox"][value="${newWorker.id}"]`
+          );
+        if (cb) cb.checked = true;
+      }, 0);
+
+      inlineWorkerForm.style.display = 'none';
+    });
+  }
+
+  /* ---- Auto-Fill Job ---- */
+  if (autoFillBtn) {
+    autoFillBtn.addEventListener('click', () => {
+      const raw = document.getElementById('raw-text').value.trim();
+      if (!raw) {
+        alert(
+          'Paste some job text from your boss first, then I can auto-fill.'
+        );
+        return;
+      }
+      const parsed = parseJobText(raw);
+      if (!parsed) {
+        alert(
+          "I couldn't understand that yet. Try a format like:\n\n" +
+            'MAGIC Con – 11/12 – 8am–5pm – Booth 4012 – LVCC West Hall'
+        );
+        return;
+      }
+
+      if (parsed.name) document.getElementById('job-name').value = parsed.name;
+      if (parsed.date) document.getElementById('job-date').value = parsed.date;
+      if (parsed.startTime)
+        document.getElementById('job-start').value = parsed.startTime;
+      if (parsed.endTime)
+        document.getElementById('job-end').value = parsed.endTime;
+      if (parsed.booth)
+        document.getElementById('job-booth').value = parsed.booth;
+      if (parsed.location)
+        document.getElementById('job-location').value = parsed.location;
+      if (parsed.phase)
+        document.getElementById('job-phase').value = parsed.phase;
+
+      setAddJobOpen(true);
+      document
+        .getElementById('add-job-section')
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      alert(
+        'Auto-Fill Job did its best guess.\n' +
+          'Review the fields below, tweak if needed, then click "Add Job".'
+      );
+    });
+  }
+
+  /* ---- Backup buttons ---- */
   if (backupDownloadLink) {
-    backupDownloadLink.addEventListener('click', () => exportBackupJson(data));
+    backupDownloadLink.addEventListener('click', () =>
+      exportBackupJson(data)
+    );
   }
 
-  /* Backup: Restore from JSON backup file */
   if (backupRestoreLink && backupFileInput) {
     backupRestoreLink.addEventListener('click', () => {
       backupFileInput.value = '';
@@ -1002,12 +1325,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /* Workers cloud (optional buttons if you add them later) */
-  const workersLoadCloudBtn = document.getElementById('workers-load-cloud-btn');
-  const workersSaveCloudBtn = document.getElementById('workers-save-cloud-btn');
-
+  /* ---- Workers cloud buttons (optional) ---- */
   if (workersSaveCloudBtn) {
-    workersSaveCloudBtn.addEventListener('click', () => saveWorkersToCloud(data.workers));
+    workersSaveCloudBtn.addEventListener('click', () =>
+      saveWorkersToCloud(data.workers)
+    );
   }
   if (workersLoadCloudBtn) {
     workersLoadCloudBtn.addEventListener('click', async () => {
@@ -1020,44 +1342,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /* Auto-Fill Job */
-  if (autoFillBtn) {
-    autoFillBtn.addEventListener('click', () => {
-      const raw = document.getElementById('raw-text').value.trim();
-      if (!raw) {
-        alert('Paste some job text from your boss first, then I can auto-fill.');
-        return;
-      }
-      const parsed = parseJobText(raw);
-      if (!parsed) {
-        alert("I couldn't understand that yet. Try a format like:\n\nMAGIC Con – 11/12 – 8am–5pm – Booth 4012 – LVCC West Hall");
-        return;
-      }
-
-      if (parsed.name) document.getElementById('job-name').value = parsed.name;
-      if (parsed.date) document.getElementById('job-date').value = parsed.date;
-      if (parsed.startTime) document.getElementById('job-start').value = parsed.startTime;
-      if (parsed.endTime) document.getElementById('job-end').value = parsed.endTime;
-      if (parsed.booth) document.getElementById('job-booth').value = parsed.booth;
-      if (parsed.location) document.getElementById('job-location').value = parsed.location;
-      if (parsed.phase) document.getElementById('job-phase').value = parsed.phase;
-
-      setAddJobOpen(true);
-      document.getElementById('add-job-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-      alert('Auto-Fill Job did its best guess.\nReview the fields below, tweak if needed, then click "Add Job".');
-    });
-  }
-
-  /* Workers list toggle via optional button, if still present */
-  if (showWorkersBtn && workersList) {
-    showWorkersBtn.addEventListener('click', () => {
-      const currentlyVisible = workersList.style.display !== 'none';
-      setWorkersOpen(!currentlyVisible);
-    });
-  }
-
-  /* Optional reset/export buttons if you add them in HTML later */
+  /* ---- Reset / Export CSV (optional) ---- */
   if (resetDataBtn) {
     resetDataBtn.addEventListener('click', () => {
       if (!confirm('Reset ALL CrewTech data on this device?')) return;
@@ -1066,20 +1351,23 @@ document.addEventListener('DOMContentLoaded', () => {
       rerenderAll();
     });
   }
+
   if (exportCsvBtn) {
     exportCsvBtn.addEventListener('click', () => exportCsv(data));
   }
 
-  /* Add worker */
+  /* ---- Add worker (Workers card) ---- */
   if (addWorkerBtn) {
     addWorkerBtn.addEventListener('click', () => {
       const nameInput = document.getElementById('worker-name');
       const phoneInput = document.getElementById('worker-phone');
-
       const name = nameInput.value.trim();
       const phone = phoneInput.value.trim();
 
-      if (!name) { alert('Enter a worker name.'); return; }
+      if (!name) {
+        alert('Enter a worker name.');
+        return;
+      }
 
       const newWorker = { id: generateId('w'), name, phone };
       data.workers.push(newWorker);
@@ -1088,12 +1376,12 @@ document.addEventListener('DOMContentLoaded', () => {
       phoneInput.value = '';
       rerenderAll();
 
-      // When a worker is added, ensure the list is visible + caret open
+      if (workersList) workersList.style.display = 'block';
       setWorkersOpen(true);
     });
   }
 
-  /* Add job */
+  /* ---- Add job ---- */
   if (addJobBtn) {
     addJobBtn.addEventListener('click', () => {
       const name = document.getElementById('job-name').value.trim();
@@ -1106,19 +1394,36 @@ document.addEventListener('DOMContentLoaded', () => {
       const rawText = document.getElementById('raw-text').value.trim();
       const phase = document.getElementById('job-phase').value;
 
-      if (!name || !date) { alert('At minimum, enter a job name and date.'); return; }
+      if (!name || !date) {
+        alert('At minimum, enter a job name and date.');
+        return;
+      }
 
       const selectedWorkerIds = Array.from(
-        document.querySelectorAll('#assign-workers input[type="checkbox"]:checked')
+        document.querySelectorAll(
+          '#assign-workers input[type="checkbox"]:checked'
+        )
       ).map((cb) => cb.value);
 
-      const assignments = selectedWorkerIds.map((id) => ({ workerId: id, status: 'Invited' }));
+      const assignments = selectedWorkerIds.map((id) => ({
+        workerId: id,
+        status: 'Invited'
+      }));
 
       const job = {
         id: generateId('j'),
-        name, date, startTime, endTime, booth, location, notes, rawText, phase,
+        name,
+        date,
+        startTime,
+        endTime,
+        booth,
+        location,
+        notes,
+        rawText,
+        phase,
         assignments,
-        assignedWorkerIds: selectedWorkerIds
+        assignedWorkerIds: selectedWorkerIds,
+        reportCompleted: false
       };
 
       data.jobs.push(job);
@@ -1133,185 +1438,356 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('job-notes').value = '';
       document.getElementById('raw-text').value = '';
       document.getElementById('job-phase').value = '';
-      document.querySelectorAll('#assign-workers input[type="checkbox"]').forEach((cb) => (cb.checked = false));
+      document
+        .querySelectorAll('#assign-workers input[type="checkbox"]')
+        .forEach((cb) => (cb.checked = false));
 
       rerenderAll();
     });
   }
+  /* ---- Finalize Job helpers ---- */
 
-  /* Splash screen: show briefly, then slide/fade away */
-  const splash = document.getElementById('splash-overlay');
-  if (splash) {
-    setTimeout(() => {
-      splash.classList.add('splash-hide');
-      splash.addEventListener('transitionend', () => {
-        if (splash && splash.parentNode) splash.parentNode.removeChild(splash);
-      }, { once: true });
-    }, 1400);
-  }
-});
-
-/* ===== Timesheet Assistant Toggle ===== */
-function toggleTimesheetAssistant() {
-  const body = document.getElementById('timesheet-assistant-body');
-  const caret = document.getElementById('ts-caret');
-  if (!body) return;
-  const isHidden = body.style.display === 'none' || body.style.display === '';
-  body.style.display = isHidden ? 'block' : 'none';
-  if (caret) caret.textContent = isHidden ? '▾' : '▸';
-}
-
-/* ===== Timesheet Assistant Logic ===== */
-(function initTimesheetAssistant() {
-  const transcriptEl = document.getElementById('ts-transcript');
-  const outputTableEl = document.getElementById('ts-outputTable');
-  const csvOutputEl = document.getElementById('ts-csvOutput');
-  const historyEl = document.getElementById('ts-history');
-
-  const recordBtn = document.getElementById('ts-recordBtn');
-  const generateBtn = document.getElementById('ts-generateBtn');
-  const copyBtn = document.getElementById('ts-copyBtn');
-  const downloadBtn = document.getElementById('ts-downloadBtn');
-
-  if (!transcriptEl || !recordBtn) return;
-
-  let recognition = null;
-  let isRecording = false;
-
-  if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    recognition = new SR();
-    recognition.lang = 'en-US';
-    recognition.continuous = true;
-    recognition.interimResults = true;
-
-    recognition.onresult = (event) => {
-      let finalTranscript = '';
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const result = event.results[i];
-        if (result.isFinal) finalTranscript += result[0].transcript.trim() + '. ';
-      }
-      if (finalTranscript) {
-        transcriptEl.value += (transcriptEl.value ? '\n' : '') + finalTranscript.trim();
-      }
-    };
-
-    recognition.onend = () => {
-      isRecording = false;
-      recordBtn.textContent = '🎤 Start Recording';
-    };
-  } else {
-    recordBtn.textContent = '🎤 Mic not supported';
+  function buildFinalizeRowsForJob(job) {
+    const assignments = getAssignments(job);
+    return assignments.map((a) => {
+      const worker = data.workers.find((w) => w.id === a.workerId);
+      return {
+        workerId: a.workerId,
+        workerName: worker ? worker.name : '(missing worker)',
+        scheduledStart: job.startTime || '',
+        scheduledEnd: job.endTime || '',
+        actualStart: job.startTime || '',
+        actualEnd: job.endTime || '',
+        totalHours: ''
+      };
+    });
   }
 
-  recordBtn.addEventListener('click', () => {
-    if (!recognition) {
-      alert('Speech recognition is not supported in this browser. You can still type your entries.');
-      return;
-    }
-    if (!isRecording) {
-      recognition.start();
-      isRecording = true;
-      recordBtn.textContent = '⏹ Stop Recording';
-    } else {
-      recognition.stop();
-      isRecording = false;
-      recordBtn.textContent = '🎤 Start Recording';
-    }
-  });
-
-  function parseTimeToMinutes(str) {
-    if (!str) return null;
-    const match = str.trim().match(/(\d{1,2}):?(\d{2})?\s*(am|pm)?/i);
-    if (!match) return null;
-    let hour = parseInt(match[1], 10);
-    let minute = match[2] ? parseInt(match[2], 10) : 0;
-    const meridiem = match[3] ? match[3].toLowerCase() : null;
-    if (meridiem === 'pm' && hour !== 12) hour += 12;
-    if (meridiem === 'am' && hour === 12) hour = 0;
-    return hour * 60 + minute;
-  }
-
-  function formatHours(startStr, endStr) {
-    const start = parseTimeToMinutes(startStr);
-    const end = parseTimeToMinutes(endStr);
-    if (start == null || end == null || end <= start) return '';
-    const diff = (end - start) / 60;
-    return diff.toFixed(2);
-  }
-
-  function parseTranscript(text) {
-    const lines = text.split(/\n+/).map((l) => l.trim()).filter((l) => l.length > 0);
+  function collectFinalizeRowsFromDom() {
     const rows = [];
-    for (const line of lines) {
-      const parts = line.split(',').map((p) => p.trim()).filter(Boolean);
-      if (parts.length < 5) continue;
-      const [date, worker, location, start, end] = parts;
-      const hours = formatHours(start, end);
-      rows.push({ date, worker, location, start, end, hours });
-    }
+    if (!finalizeWorkersContainer) return rows;
+
+    const trList = finalizeWorkersContainer.querySelectorAll('tbody tr');
+    trList.forEach((tr) => {
+      const workerId = tr.getAttribute('data-worker-id') || '';
+      const cells = tr.querySelectorAll('td');
+      const nameCell = cells[0];
+      const schedStartCell = cells[1];
+      const schedEndCell = cells[2];
+      const actualStartInput = tr.querySelector('input[data-field="actualStart"]');
+      const actualEndInput = tr.querySelector('input[data-field="actualEnd"]');
+      const totalHoursInput = tr.querySelector('input[data-field="totalHours"]');
+
+      rows.push({
+        workerId,
+        workerName: nameCell ? nameCell.textContent.trim() : '',
+        scheduledStart: schedStartCell ? schedStartCell.textContent.trim() : '',
+        scheduledEnd: schedEndCell ? schedEndCell.textContent.trim() : '',
+        actualStart: actualStartInput ? actualStartInput.value : '',
+        actualEnd: actualEndInput ? actualEndInput.value : '',
+        totalHours: totalHoursInput ? totalHoursInput.value : ''
+      });
+    });
+
     return rows;
   }
 
-  function renderTable(rows) {
+  function buildFinalizeReportText(job, rows) {
+    const lines = [];
+    lines.push(`Job: ${job.name || ''}`);
+    if (job.date) lines.push(`Date: ${formatDate(job.date)}`);
+
+    const timeBits = [];
+    if (job.startTime) timeBits.push(formatTime(job.startTime));
+    if (job.endTime) timeBits.push(formatTime(job.endTime));
+    if (timeBits.length) lines.push(`Scheduled: ${timeBits.join(' – ')}`);
+
+    const locBits = [];
+    if (job.booth) locBits.push('Booth ' + job.booth);
+    if (job.location) locBits.push(job.location);
+    if (locBits.length) lines.push('Location: ' + locBits.join(' • '));
+
+    if (job.phase) lines.push('Phase: ' + job.phase);
+    lines.push('');
+    lines.push('Workers (Sched vs Actual):');
+    lines.push('Name | Sched Start | Sched End | Actual Start | Actual End | Total Hrs');
+    lines.push('---- | ----------- | --------- | ------------ | ---------- | ---------');
+
+    rows.forEach((r) => {
+      lines.push(
+        `${r.workerName || ''} | ${r.scheduledStart || ''} | ${
+          r.scheduledEnd || ''
+        } | ${r.actualStart || ''} | ${r.actualEnd || ''} | ${
+          r.totalHours || ''
+        }`
+      );
+    });
+
+    return lines.join('\n');
+  }
+
+  function renderFinalizeWorkersTable(job) {
+    if (!finalizeWorkersContainer) return;
+
+    const rows = buildFinalizeRowsForJob(job);
     if (!rows.length) {
-      outputTableEl.innerHTML = '<p class="muted">No valid lines found. Make sure each line follows the example format.</p>';
-      csvOutputEl.value = '';
+      finalizeWorkersContainer.innerHTML =
+        '<p class="muted">No workers assigned to this job yet.</p>';
+      if (finalizeExportBtn) finalizeExportBtn.disabled = true;
+      if (finalizeCompleteBtn) finalizeCompleteBtn.disabled = true;
+      if (finalizeNotes) finalizeNotes.value = '';
       return;
     }
 
     let html =
-      '<table class="ts-table"><thead><tr>' +
-      '<th>Date</th><th>Worker</th><th>Location</th><th>Start</th><th>End</th><th>Hours</th>' +
+      '<div class="scroll-x"><table class="table"><thead><tr>' +
+      '<th>Worker</th><th>Sched start</th><th>Sched end</th>' +
+      '<th>Actual start</th><th>Actual end</th><th>Total hrs</th>' +
       '</tr></thead><tbody>';
 
-    let csv = 'Date,Worker,Location,Start,End,Hours\n';
-
     rows.forEach((row) => {
-      html += `<tr>
-        <td>${row.date}</td>
-        <td>${row.worker}</td>
-        <td>${row.location}</td>
-        <td>${row.start}</td>
-        <td>${row.end}</td>
-        <td>${row.hours}</td>
-      </tr>`;
-      csv += `"${row.date}","${row.worker}","${row.location}","${row.start}","${row.end}","${row.hours}"\n`;
+      html +=
+        `<tr data-worker-id="${row.workerId}">` +
+        `<td>${row.workerName}</td>` +
+        `<td>${row.scheduledStart || '-'}</td>` +
+        `<td>${row.scheduledEnd || '-'}</td>` +
+        `<td><input type="time" class="finalize-input" data-field="actualStart" value="${row.actualStart}"></td>` +
+        `<td><input type="time" class="finalize-input" data-field="actualEnd" value="${row.actualEnd}"></td>` +
+        `<td><input type="number" class="finalize-input" data-field="totalHours" step="0.25" min="0" placeholder="0"></td>` +
+        '</tr>';
     });
 
-    html += '</tbody></table>';
-    outputTableEl.innerHTML = html;
-    csvOutputEl.value = csv.trim();
+    html += '</tbody></table></div>';
+    finalizeWorkersContainer.innerHTML = html;
 
-    const stamp = new Date().toLocaleString();
-    historyEl.textContent = `Last generated: ${stamp} (${rows.length} row${rows.length === 1 ? '' : 's'})`;
+    if (finalizeExportBtn) finalizeExportBtn.disabled = false;
+    if (finalizeCompleteBtn) finalizeCompleteBtn.disabled = false;
+
+    const collected = collectFinalizeRowsFromDom();
+    if (finalizeNotes) {
+      finalizeNotes.value = buildFinalizeReportText(job, collected);
+    }
   }
 
-  generateBtn.addEventListener('click', () => {
-    const text = transcriptEl.value.trim();
-    if (!text) { alert('Add some lines first (by speaking or typing) before generating.'); return; }
-    const rows = parseTranscript(text);
-    renderTable(rows);
-  });
+  /* ---- Finalize Job: dropdown change ---- */
+  if (finalizeJobSelect && finalizeWorkersContainer && finalizeNotes) {
+    finalizeJobSelect.addEventListener('change', () => {
+      const jobId = finalizeJobSelect.value;
+      if (!jobId) {
+        finalizeWorkersContainer.innerHTML =
+          '<p class="muted">Select a job above to see workers and hours.</p>';
+        finalizeNotes.value = '';
+        if (finalizeExportBtn) finalizeExportBtn.disabled = true;
+        if (finalizeCompleteBtn) finalizeCompleteBtn.disabled = true;
+        return;
+      }
 
-  copyBtn.addEventListener('click', async () => {
-    if (!csvOutputEl.value) { alert('Nothing to copy yet.'); return; }
-    try {
-      await navigator.clipboard.writeText(csvOutputEl.value);
-      alert('CSV copied to clipboard.');
-    } catch (e) {
-      alert('Unable to copy. You can still select and copy manually.');
+      const job = data.jobs.find((j) => j.id === jobId);
+      if (!job) return;
+      renderFinalizeWorkersTable(job);
+    });
+  }
+
+  /* ---- Finalize Job: Copy report text (button) ---- */
+  if (finalizeExportBtn && finalizeNotes) {
+    finalizeExportBtn.addEventListener('click', async () => {
+      const text = finalizeNotes.value.trim();
+      if (!text) {
+        alert('There is no report text to copy yet.');
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(text);
+        alert('Report copied to clipboard.');
+      } catch (err) {
+        console.error('Clipboard error:', err);
+        finalizeNotes.focus();
+        finalizeNotes.select();
+        alert('Couldn’t auto-copy. Text is selected — press Ctrl/Cmd + C.');
+      }
+    });
+  }
+
+  /* ---- Finalize Job: Download CSV (link under textarea) ---- */
+  if (finalizeDownloadLink && finalizeJobSelect) {
+    finalizeDownloadLink.addEventListener('click', (e) => {
+      e.preventDefault();
+
+      const jobId = finalizeJobSelect.value;
+      if (!jobId) {
+        alert('Pick a job to finalize first.');
+        return;
+      }
+
+      const job = data.jobs.find((j) => j.id === jobId);
+      if (!job) return;
+
+      const rows = collectFinalizeRowsFromDom();
+      if (!rows.length) {
+        alert('No worker rows to export yet.');
+        return;
+      }
+
+      const csvLines = [];
+      csvLines.push(
+        [
+          'Job Name',
+          'Date',
+          'Booth',
+          'Location',
+          'Phase',
+          'Worker',
+          'Sched Start',
+          'Sched End',
+          'Actual Start',
+          'Actual End',
+          'Total Hours'
+        ].join(',')
+      );
+
+      rows.forEach((r) => {
+        const row = [
+          job.name || '',
+          job.date || '',
+          job.booth || '',
+          job.location || '',
+          job.phase || '',
+          r.workerName || '',
+          r.scheduledStart || '',
+          r.scheduledEnd || '',
+          r.actualStart || '',
+          r.actualEnd || '',
+          r.totalHours || ''
+        ].map((v) => '"' + String(v).replace(/"/g, '""') + '"');
+        csvLines.push(row.join(','));
+      });
+
+      const blob = new Blob([csvLines.join('\n')], {
+        type: 'text/csv;charset=utf-8;'
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'crewtech-final-report.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 1000);
+    });
+  }
+
+  /* ---- Finalize Job: Complete & move to Completed ---- */
+  if (
+    finalizeCompleteBtn &&
+    finalizeJobSelect &&
+    finalizeWorkersContainer &&
+    finalizeNotes
+  ) {
+    finalizeCompleteBtn.addEventListener('click', () => {
+      const jobId = finalizeJobSelect.value;
+      if (!jobId) {
+        alert('Pick a job to finalize first.');
+        return;
+      }
+
+      const job = data.jobs.find((j) => j.id === jobId);
+      if (!job) return;
+
+      if (
+        !confirm(
+          'Mark this job as report completed and move it to Completed Jobs?'
+        )
+      ) {
+        return;
+      }
+
+      job.reportCompleted = true;
+      saveData(data);
+      rerenderAll();
+
+      finalizeJobSelect.value = '';
+      finalizeWorkersContainer.innerHTML =
+        '<p class="muted">Job finalized. Pick another job to finalize.</p>';
+      finalizeNotes.value = '';
+      if (finalizeExportBtn) finalizeExportBtn.disabled = true;
+      if (finalizeCompleteBtn) finalizeCompleteBtn.disabled = true;
+    });
+  }
+
+  /* ---- Master rerender ---- */
+  function rerenderAll() {
+    // Normalize assignments + save
+    data.jobs.forEach((job) => getAssignments(job));
+    saveData(data);
+
+    // Main cards
+    renderAssignWorkers(data);
+    renderWorkersTable(data);
+    renderUpcomingMini(data);
+    renderUpcomingFull(data);
+    renderCompletedJobs(data);
+
+    // Populate Finalize Job dropdown with only "report needed" jobs
+    const finalizeSelect = document.getElementById('finalize-job-select');
+    if (finalizeSelect) {
+      finalizeSelect.innerHTML = '<option value="">Select a job…</option>';
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const sorted = sortJobsByDateTime(data.jobs).filter((job) => {
+        if (!job.date) return false;
+        const d = new Date(job.date + 'T00:00:00');
+        if (isNaN(d)) return false;
+
+        const isPastOrToday = d <= today;
+        const reportDone = !!job.reportCompleted;
+
+        // Only show jobs that are today or earlier AND not yet finalized
+        return isPastOrToday && !reportDone;
+      });
+
+      if (!sorted.length) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.disabled = true;
+        opt.textContent = 'No jobs need reports right now.';
+        finalizeSelect.appendChild(opt);
+      } else {
+        sorted.forEach((job) => {
+          const opt = document.createElement('option');
+          opt.value = job.id;
+          const labelParts = [];
+          if (job.date) labelParts.push(formatDateShort(job.date));
+          if (job.name) labelParts.push(job.name);
+          opt.textContent = labelParts.join(' – ') || '(no name)';
+          finalizeSelect.appendChild(opt);
+        });
+      }
     }
-  });
+  }
 
-  downloadBtn.addEventListener('click', () => {
-    if (!csvOutputEl.value) { alert('Nothing to download yet.'); return; }
-    const blob = new Blob([csvOutputEl.value], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'timesheet.csv';
-    document.body.appendChild(a); a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  });
-})();
+  window._crewtechRerenderAll = rerenderAll;
+  rerenderAll();
+
+  /* ---- Splash screen ---- */
+  const splash = document.getElementById('splash-overlay');
+  if (splash) {
+    setTimeout(() => {
+      splash.classList.add('splash-hide');
+      splash.addEventListener(
+        'transitionend',
+        () => {
+          if (splash && splash.parentNode) {
+            splash.parentNode.removeChild(splash);
+          }
+        },
+        { once: true }
+      );
+    }, 1400);
+  }
+});

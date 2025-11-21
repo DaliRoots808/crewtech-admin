@@ -109,20 +109,7 @@ h2[role="button"] {
   text-align: center;
 }
 
-/* Icon chip before H2 titles by default */
-.section h2::before {
-  content: "󰋊";
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 999px;
-  border: 1px solid var(--border-soft);
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  background: #f9fafb;
-}
+
 
 .section p {
   margin-top: 0;
@@ -278,6 +265,38 @@ button.danger:hover {
   margin-top: 0.5rem;
   background: #ffffff;
   font-size: 0.85rem;
+}
+/* Condensed style ONLY for Upcoming Jobs */
+#upcoming-jobs-section #upcoming-jobs-list .job-card {
+  padding: 0.45rem 0.7rem;
+  margin-top: 0.4rem;
+  font-size: 0.82rem;
+  border-radius: 14px;
+}
+
+/* Title inside condensed cards */
+#upcoming-jobs-section #upcoming-jobs-list .job-card-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
+/* Meta line (date, time, booth, location) */
+#upcoming-jobs-section #upcoming-jobs-list .job-card-meta {
+  font-size: 0.78rem;
+  line-height: 1.25;
+  margin-bottom: 0.25rem;
+}
+
+
+
+/* Workers line — compact, same line, lighter style */
+#upcoming-jobs-section #upcoming-jobs-list .job-card-workers {
+  display: block;
+  font-size: 0.75rem;
+  color: #4b5563; /* subtle muted gray */
+  margin-top: 0.1rem;
+  line-height: 1.2;
 }
 
 .job-card-title {
@@ -852,6 +871,11 @@ button.danger:hover {
 }
 
 /* Add Job caret + open state (Admin) */
+#all-jobs-toggle .caret {
+  display: inline-block;
+  transition: transform 160ms ease;
+}
+
 #add-job-section h2 {
   cursor: pointer;
   gap: 0.4rem;
@@ -893,23 +917,7 @@ button.danger:hover {
   text-align: center;
 }
 
-/* Round icon before worker titles */
-#worker-dashboard > h2::before,
-#open-jobs-section > h3::before,
-#upcoming-jobs-section > h3::before,
-#completed-jobs-section > h3::before {
-  content: "󰋊";
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 999px;
-  border: 1px solid var(--border-soft);
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  background: #f9fafb;
-}
+
 
 /* JOB CARDS – Worker text hierarchy */
 #open-jobs-section .job-card,
@@ -1087,6 +1095,17 @@ button.small.danger {
   margin-bottom: 0.75rem;
 }
 
+/* Fix See All Jobs button alignment inside Upcoming Jobs */
+#upcoming-jobs-section .see-all-wrapper {
+  margin-top: 0.75rem;
+  text-align: center;
+}
+
+#upcoming-jobs-section .see-all-link {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.82rem;
+}
+
 #see-all-jobs-btn {
   display: inline-flex;
   justify-content: center;
@@ -1120,3 +1139,4 @@ button.small.danger {
 #schedule-overview-section > p {
   text-align: center;
 }
+
