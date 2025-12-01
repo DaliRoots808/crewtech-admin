@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CrewTech — Worker Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Reuse main stylesheet -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Splash (same look as admin for brand consistency) -->
+  <div id="splash-overlay">
+    <div class="splash-inner">
+      <div class="logo-shine-wrap">
+        <img src="crewtech_logo.png" alt="CrewTech logo" class="splash-logo" />
+      </div>
+      <p class="splash-caption">Loading your jobs…</p>
+    </div>
+  </div>
+
+  <div class="page">
+    <header>
+      <div class="header-logo-only">
+        <img src="crewtech_logo.png" alt="CrewTech logo" class="logo" />
+      </div>
+      <p class="tagline">Your crew, your time, your tool.</p>
+    </header>
+
+      <!-- Worker Dashboard wrapper -->
+      <main id="worker-dashboard">
+
+        <!-- Worker meta only (centered) -->
+        <p class="worker-meta-centered" id="worker-meta"></p>
+        <p class="worker-meta-centered" id="worker-name-display"></p>
+        <div class="sms-pref-stack">
+          <div id="sms-preference-row" class="sms-pref-row">
+            <span id="sms-pref-label" class="sms-pref-label">
+              SMS Alerts: not set
+            </span>
+
+            <label class="sms-switch">
+              <input
+                id="sms-opt-in-toggle"
+                type="checkbox"
+                aria-label="Toggle SMS alerts on or off"
+              >
+              <span class="sms-slider"></span>
+            </label>
+          </div>
+
+          <div id="worker-phone-row" class="worker-phone-row">
+            <input
+              id="worker-phone-input"
+              type="tel"
+              inputmode="tel"
+              autocomplete="tel"
+              placeholder="Update phone number"
+              class="worker-phone-input"
+            />
+            <button
+              id="worker-phone-save-btn"
+              type="button"
+              class="worker-phone-save-btn"
+            >
+              Save
+            </button>
+          </div>
+        </div>
+      <!-- 🟠 Open Jobs -->
+      <section class="section" id="open-jobs-section">
+        <h3>
+          <span class="icon-wrap">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4b5563" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="12" cy="12" r="10" stroke="#d1d5db" fill="white" />
+  <rect x="8" y="9" width="8" height="6" rx="1" />
+  <path d="M8 9l4 3 4-3" />
+  <path d="M9 15h6" />
+</svg>
+</span>
+          <span>Open Jobs</span>
+        </h3>
+        <p class="muted">
+          These are shifts you’ve been invited to. Tap <strong>Confirm</strong> if you can work it,
+          or <strong>Decline</strong> if you can’t. New invites from your supervisor will show up here.
+        </p>
+        <div id="open-jobs"></div>
+      </section>
+
+      <!-- 🟢 Upcoming Shifts -->
+      <section class="section" id="upcoming-jobs-section">
+        <h3>
+          <span class="icon-wrap">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4b5563" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="12" cy="12" r="10" stroke="#d1d5db" fill="white" />
+  <rect x="8" y="10" width="8" height="6" rx="1" />
+  <line x1="10" y1="9" x2="10" y2="8.2" />
+  <line x1="14" y1="9" x2="14" y2="8.2" />
+  <path d="M10.5 13l1.4 1.4 2.1-2.1" />
+</svg>
+</span>
+          <span>Upcoming Shifts</span>
+        </h3>
+
+        <p class="muted">
+          These are the shifts you’ve already confirmed. Details may update if your boss changes the schedule,
+          so check here anytime for the latest info.
+        </p>
+        <p class="worker-note">(Need to cancel a shift? Please contact your supervisor directly.)</p>
+
+        <!-- Wrapper so ONLY this area scrolls when expanded -->
+        <div id="upcoming-jobs-wrapper">
+          <div id="upcoming-jobs"></div>
+        </div>
+
+        <!-- Caret toggle: bottom-right, expands/collapses extra shifts -->
+        
+      </section>
+
+      <!-- ⚪ Completed Jobs -->
+      <section class="section" id="completed-jobs-section">
+        <h3>
+          <span class="icon-wrap">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4b5563" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="12" cy="12" r="10" stroke="#d1d5db" fill="white" />
+  <path d="M9 12.5l1.6 1.6 3.4-3.4" />
+  <path d="M9.2 8.5h5.6" />
+  <path d="M8.5 10.5v3.2c0 0.5 0.4 0.8 0.8 0.8h5.4c0.4 0 0.8-0.3 0.8-0.8v-3.2" />
+</svg>
+</span>
+          <span>Completed Jobs</span>
+        </h3>
+
+        <p class="muted">
+          These are the shifts you’ve already worked. Use this section to look back on hours, locations,
+          and details for your own records.
+        </p>
+
+        <div id="completed-jobs"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Worker logic -->
+  <script src="worker.js"></script>
+  <div id="sms-toast" aria-live="polite"></div>
+</body>
+
+
+<p class="muted"
+   style="font-size:0.8rem; margin-top:0.1rem; text-align:center; width:100%;">
+  <a href="legal.html" target="_blank">Privacy &amp; SMS Policy</a> ·
+  <a href="terms.html" target="_blank">Terms of Service</a>
+</p>
+
+</html>

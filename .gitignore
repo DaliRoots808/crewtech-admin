@@ -1,0 +1,8 @@
+# Local Netlify folder
+.netlify
+
+.env
+.env.*
+!.env.example
+node_modules
+twilio_2FA_recovery_code.txt

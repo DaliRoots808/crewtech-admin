@@ -1,0 +1,1430 @@
+:root {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  color-scheme: light;
+
+  --orange: #f97316;
+  --orange-dark: #ea580c;
+  --orange-soft: #ffe4c7;
+
+  --green: #16a34a;
+  --green-soft: #22c55e;
+  --green-outline-bg: #f0fdf4;
+
+  --danger: #dc2626;
+  --danger-bg: #fef2f2;
+  --danger-border: #fecaca;
+
+  --text-main: #111827;
+  --text-muted: #6b7280;
+  --border-soft: #e5e7eb;
+  --border-card: #d4d4d8;
+}
+
+/* Center ONLY the Add Job title (Admin) */
+#add-job-section h2 {
+  text-align: center;
+  justify-content: center;
+  width: 100%;
+}
+
+/* PAGE & HEADER */
+body {
+  margin: 0;
+  padding: 0;
+  background: #f97316; /* solid bright orange */
+  color: var(--text-main);
+}
+
+.page {
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 1.4rem 1rem 2.6rem;
+}
+
+header {
+  margin-bottom: 0.75rem;
+}
+
+header h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.9rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+header p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #fee2c5;
+}
+
+header p.muted {
+  font-size: 0.8rem;
+  color: #ffedd5;
+  opacity: 0.85;
+}
+
+.muted {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+h2[role="button"] {
+  cursor: pointer;
+}
+
+/* SECTIONS (WHITE CARDS) */
+.section {
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 1rem;
+  margin: 0.75rem 0;
+  border: 1px solid var(--border-card);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* Give the Timesheet card side gutters (Admin) */
+#timesheet-assistant-card {
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+
+/* Generic section titles (Admin + Worker) */
+.section h2,
+.section h3 {
+  margin-top: 0;
+  margin-bottom: 0.35rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--orange-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  text-align: center;
+}
+
+
+
+.section p {
+  margin-top: 0;
+  font-size: 0.9rem;
+  color: var(--text-main);
+}
+
+.shift-selector {
+  margin-top: 0.35rem;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.shift-selector-label {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: #6b7280;
+}
+
+.shift-pill-row {
+  display: inline-flex;
+  gap: 0.35rem;
+}
+
+.shift-pill {
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  padding: 0.15rem 0.7rem;
+  background: #f9fafb;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.shift-pill-active {
+  border-color: #16a34a;
+  background: #dcfce7;
+  font-weight: 500;
+}
+
+/* LAYOUT HELPERS */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.subsection-label {
+  margin-top: 0.6rem;
+  margin-bottom: 0.15rem;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.center-btn {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.75rem;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--text-muted);
+}
+
+/* FORM CONTROLS */
+input,
+textarea,
+select {
+  border-radius: 12px;
+  border: 1px solid var(--border-soft);
+  background: #f9fafb;
+  color: inherit;
+  padding: 0.5rem 0.6rem;
+  font: inherit;
+  width: 100%;
+  box-sizing: border-box;
+  outline: none;
+  transition:
+    border-color 0.12s ease,
+    box-shadow 0.12s ease,
+    background 0.12s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--green-soft);
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25);
+  background: #ffffff;
+}
+
+textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+/* BASE BUTTONS – soft rectangle, Auto-Fill style */
+button {
+  border-radius: 14px;
+  padding: 0.55rem 1.2rem;
+  font: inherit;
+  cursor: pointer;
+
+  background: linear-gradient(145deg, #ffffff, #f3f4f6);
+  color: #1f2937;
+  font-weight: 600;
+
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+button:hover {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  filter: brightness(1.04);
+}
+
+button:active {
+  transform: translateY(1px);
+  box-shadow: none;
+  opacity: 0.96;
+}
+
+/* Smaller buttons (worker confirm/decline etc.) */
+button.small {
+  padding: 0.32rem 0.9rem;
+  font-size: 0.8rem;
+}
+
+/* Secondary + danger variants */
+button.secondary {
+  background: #ffffff;
+  color: var(--green);
+  border: 1px solid var(--green);
+  box-shadow: none;
+}
+
+button.danger {
+  background: #dc2626;
+  color: #fef2f2;
+  box-shadow: 0 6px 18px rgba(220, 38, 38, 0.3);
+}
+
+button.secondary:hover {
+  background: var(--green-outline-bg);
+}
+
+button.danger:hover {
+  background: #b91c1c;
+}
+
+/* OVERVIEW JOB CARDS (Admin generic) */
+.job-card {
+  border-radius: 18px;
+  border: 1px solid #e5e7eb;
+  padding: 0.6rem 0.8rem;
+  margin-top: 0.5rem;
+  background: #ffffff;
+  font-size: 0.85rem;
+}
+/* Condensed style ONLY for Upcoming Jobs */
+#upcoming-jobs-section #upcoming-jobs-list .job-card {
+  padding: 0.45rem 0.7rem;
+  margin-top: 0.4rem;
+  font-size: 0.82rem;
+  border-radius: 14px;
+}
+
+/* Title inside condensed cards */
+#upcoming-jobs-section #upcoming-jobs-list .job-card-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
+/* Meta line (date, time, booth, location) */
+#upcoming-jobs-section #upcoming-jobs-list .job-card-meta {
+  font-size: 0.78rem;
+  line-height: 1.25;
+  margin-bottom: 0.25rem;
+}
+
+
+
+/* Workers line — compact, same line, lighter style */
+#upcoming-jobs-section #upcoming-jobs-list .job-card-workers {
+  display: block;
+  font-size: 0.75rem;
+  color: #4b5563; /* subtle muted gray */
+  margin-top: 0.1rem;
+  line-height: 1.2;
+}
+
+.job-card-title {
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+  color: #111827;
+}
+
+.job-card-meta {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.job-card-workers {
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+/* WORKERS TABLE / LINKS (Admin) */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.table th,
+.table td {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0.45rem 0.3rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.table th {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6b7280;
+}
+
+.worker-link-input {
+  width: 100%;
+  font-size: 0.75rem;
+  padding: 0.3rem 0.4rem;
+  background: #f9fafb;
+}
+
+.worker-delete-btn {
+  background: transparent;
+  border: none;
+  color: var(--danger);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0.2rem 0.4rem;
+}
+
+.worker-delete-btn:hover {
+  text-decoration: underline;
+}
+
+.scroll-x {
+  overflow-x: auto;
+}
+
+#workers-list .scroll-x {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+#workers-list .scroll-x table {
+  width: 100%;
+}
+
+/* ASSIGN WORKERS CHIP LIST (Admin) */
+.assign-workers-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.6rem;
+  margin-top: 0.35rem;
+}
+
+.assign-workers-list label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  text-transform: none;
+  letter-spacing: 0;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.assign-workers-list input[type="checkbox"] {
+  width: auto;
+}
+
+/* MONTH GROUPS / ALL JOBS TABLE (Admin) */
+.month-group {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0.4rem 0 0.4rem;
+}
+
+.month-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: 0.35rem 0.1rem;
+  border-radius: 0.6rem;
+  transition: background 0.12s ease;
+  background: #ffffff;
+}
+
+.month-header:hover {
+  background: #fff7ed;
+}
+
+.month-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.month-count {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.month-arrow {
+  font-size: 0.8rem;
+  margin-left: 0.4rem;
+  color: var(--orange-dark);
+}
+
+.month-body {
+  margin-top: 0.25rem;
+}
+
+.job-row {
+  border-radius: 18px;
+  border: 1px solid #e5e7eb;
+  margin-top: 0.35rem;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.job-row-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.45rem 0.65rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.job-row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.job-row-title-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: baseline;
+}
+
+.phase-tag {
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border: 1px solid transparent;
+}
+
+.phase-build {
+  background: #ecfdf3;
+  color: #166534;
+  border-color: #bbf7d0;
+}
+
+.phase-assist {
+  background: #fff7ed;
+  color: #9a3412;
+  border-color: #fed7aa;
+}
+
+.phase-dismantle {
+  background: #f5f3ff;
+  color: #5b21b6;
+  border-color: #ddd6fe;
+}
+
+.job-row-date {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--orange-dark);
+}
+
+.job-row-name {
+  font-size: 0.9rem;
+}
+
+.job-row-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.job-row-workers-summary {
+  font-size: 0.75rem;
+  color: #0f766e;
+}
+
+.job-row-arrow {
+  font-size: 0.8rem;
+  opacity: 0.9;
+  display: flex;
+  align-items: center;
+  color: var(--orange-dark);
+}
+
+.job-row-details {
+  display: none;
+  border-top: 1px solid #e5e7eb;
+  padding: 0.55rem 0.7rem 0.65rem;
+  font-size: 0.8rem;
+  background: #f9fafb;
+}
+
+.job-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem 0.75rem;
+  margin-bottom: 0.4rem;
+}
+
+.job-details-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 0.1rem;
+}
+
+.job-details-value {
+  font-size: 0.8rem;
+}
+
+.job-notes-block {
+  margin-top: 0.35rem;
+}
+
+.job-workers-block {
+  margin-top: 0.4rem;
+}
+
+.worker-status-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.25rem;
+}
+
+.worker-status-name {
+  font-size: 0.8rem;
+  min-width: 120px;
+}
+
+/* STATUS PILLS (Admin + Worker shared base) */
+.status-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.75rem;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #4b5563;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease,
+    border-color 0.12s ease,
+    box-shadow 0.12s ease;
+  box-shadow: none !important;
+}
+
+.status-pill.invited {
+  background: #fefce8;
+  border-color: #facc15;
+}
+
+/* Light green, dark text confirmed pill */
+.status-pill.confirmed {
+  background: #d1fae5;
+  border: 1px solid #22c55e;
+  color: #065f46;
+}
+
+.status-pill.declined {
+  background: #fef2f2;
+  border-color: #fca5a5;
+}
+
+.status-pill.active.invited {
+  background: #facc15;
+  border-color: #eab308;
+  color: #1f2937;
+  box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.6);
+}
+
+.status-pill.active.confirmed {
+  background: #22c55e;
+  border-color: #16a34a;
+  color: #f9fafb;
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.65);
+}
+
+.status-pill.active.declined {
+  background: #ef4444;
+  border-color: #b91c1c;
+  color: #fef2f2;
+  box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.6);
+}
+
+.job-actions {
+  margin-top: 0.6rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.job-actions .danger {
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: 1px solid var(--danger-border);
+  box-shadow: none;
+}
+
+.job-actions .danger:hover {
+  background: #fee2e2;
+}
+
+/* RESPONSIVE */
+@media (max-width: 700px) {
+  .grid,
+  .grid-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .page {
+    padding: 1.2rem 0.75rem 2.2rem;
+  }
+
+  header {
+    margin-bottom: 0.5rem;
+  }
+
+  header h1 {
+    font-size: 1.6rem;
+  }
+
+  .job-details-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Breathing room before each form group */
+.section .grid,
+.section .field {
+  margin-top: 0.75rem;
+}
+
+/* ==== Timesheet Assistant embedded styles (Admin) ==== */
+.ts-app {
+  padding: 0.75rem;
+  border-radius: 18px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+}
+
+.ts-hint {
+  font-size: 0.85rem;
+  color: var(--text-main);
+  margin-top: 0;
+  margin-bottom: 0.6rem;
+}
+
+.ts-hint-example {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.ts-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 0.35rem;
+}
+
+.ts-buttons-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+.ts-table-wrapper {
+  margin-top: 0.8rem;
+  overflow-x: auto;
+  font-size: 0.85rem;
+}
+
+.ts-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ts-table th,
+.ts-table td {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0.35rem 0.25rem;
+  text-align: left;
+}
+
+.ts-table th {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.ts-history {
+  margin-top: 0.8rem;
+  padding-top: 0.4rem;
+  border-top: 1px dashed #e5e7eb;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Fix padding consistency for Timesheet Assistant card */
+#timesheet-assistant-card {
+  padding-top: 1.2rem;
+  padding-bottom: 1.2rem;
+}
+
+#timesheet-assistant-card h2 {
+  margin-bottom: 0.7rem;
+}
+
+#timesheet-section h2 {
+  margin-bottom: 0.4rem;
+}
+
+/* Center Job Overview / All Jobs titles (Admin) */
+#schedule-overview-section h2,
+#all-jobs-section h2 {
+  text-align: center;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Header logo */
+.header-logo-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.logo {
+  height: 64px;
+  width: auto;
+}
+
+.header-logo-only {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 0;
+}
+
+.tagline {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #fee2c5;
+  margin-top: 0;
+}
+
+/* ==== Splash / Loading Overlay (Worker) ==== */
+#splash-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: linear-gradient(135deg, #ea580c, #f97316);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 0.3s ease-out,
+    transform 10s ease-out;
+}
+
+.splash-inner {
+  text-align: center;
+}
+
+.splash-logo {
+  height: 96px;
+  width: auto;
+  display: block;
+  margin: 0 auto 0.6rem;
+}
+
+.splash-caption {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #fffbeb;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Logo Shine Effect */
+.logo-shine-wrap {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+}
+
+.logo-shine-wrap::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-20deg);
+  animation: logoShine 1.1s ease-in-out 0.1s forwards;
+}
+
+@keyframes logoShine {
+  0% {
+    left: -150%;
+  }
+
+  100% {
+    left: 150%;
+  }
+}
+
+/* Hidden state after animation */
+#splash-overlay.splash-hide {
+  opacity: 0;
+  transform: translateY(-30px);
+  pointer-events: none;
+}
+
+/* Add Job caret + open state (Admin) */
+#all-jobs-toggle .caret {
+  display: inline-block;
+  transition: transform 160ms ease;
+}
+
+#add-job-section h2 {
+  cursor: pointer;
+  gap: 0.4rem;
+}
+
+#add-job-toggle .caret {
+  display: inline-block;
+  transition: transform 160ms ease;
+}
+
+#add-job-toggle[aria-expanded="true"] .caret {
+  transform: rotate(90deg);
+}
+
+#all-jobs-section {
+  margin-bottom: 0.75rem;
+}
+
+/* ==================================================================== */
+/* WORKER PORTAL – VISUAL OVERRIDES                                     */
+/* ==================================================================== */
+
+/* Center main worker section titles + icon chip */
+#worker-dashboard > h2,
+#open-jobs-section > h3,
+#upcoming-jobs-section > h3,
+#completed-jobs-section > h3 {
+  margin-top: 0;
+  margin-bottom: 0.35rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--orange-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  text-align: center;
+}
+
+/* Wrapper for stacked SMS toggle + phone input */
+.sms-pref-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: -0.1rem;
+  margin-bottom: 0.75rem;
+  width: 100%;
+}
+
+/* SMS Alerts row (toggle + label) */
+.sms-pref-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.8rem;
+  color: #ffe7cf;
+}
+
+.sms-pref-row-label {
+  white-space: nowrap;
+}
+
+/* Phone controls wrapper (under SMS toggle) */
+.sms-phone-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.9rem;
+}
+
+/* Small “Update phone number” link-style button */
+.sms-phone-edit-link {
+  border-radius: 999px;
+  padding: 0.25rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff7ed;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+}
+
+.sms-phone-edit-link:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* Inline phone editor row (input + Save) */
+.sms-phone-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.sms-phone-edit-row input {
+  max-width: 190px;
+}
+
+/* Make the small Save button compact */
+.sms-phone-edit-row button {
+  font-size: 0.8rem;
+  padding: 0.32rem 0.85rem;
+}
+
+/* Generic hidden utility (safe globally) */
+.hidden {
+  display: none !important;
+}
+
+/* Slider switch container */
+.sms-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 38px;
+  height: 20px;
+  cursor: pointer;
+}
+
+/* Hide the raw checkbox, keep it accessible */
+.sms-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+/* Track background */
+.sms-slider {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  transition: background 0.18s ease;
+}
+
+/* Slider knob */
+.sms-slider::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: transform 0.18s ease;
+}
+
+/* Checked (ON) state */
+.sms-switch input:checked + .sms-slider {
+  background: #bbf7d0; /* soft green when enabled */
+}
+
+.sms-switch input:checked + .sms-slider::before {
+  transform: translateX(18px);
+}
+
+/* Keyboard focus ring */
+.sms-switch input:focus-visible + .sms-slider {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/* Style the small Update button to look subtle on orange header */
+.sms-pref-row button {
+  background: transparent;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  color: #ffe7cf;
+  padding: 0.15rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.sms-pref-row button:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+
+
+/* JOB CARDS – Worker text hierarchy */
+#open-jobs-section .job-card,
+#upcoming-jobs-section .job-card,
+#completed-jobs-section .job-card {
+  padding: 0.9rem 1rem;
+}
+
+/* Job title: left aligned, stronger */
+#open-jobs-section .job-card-title,
+#upcoming-jobs-section .job-card-title,
+#completed-jobs-section .job-card-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 0.3rem;
+  text-align: left;
+}
+
+/* Meta line: left aligned (date • time • booth • location) */
+#open-jobs-section .job-card-meta,
+#upcoming-jobs-section .job-card-meta,
+#completed-jobs-section .job-card-meta {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+  text-align: left;
+}
+
+/* Strong bits in meta (if used) */
+#open-jobs-section .job-card-meta strong,
+#upcoming-jobs-section .job-card-meta strong,
+#completed-jobs-section .job-card-meta strong {
+  color: var(--orange-dark);
+  font-weight: 700;
+}
+
+/* Notes block: labeled, with subtle divider */
+#open-jobs-section .job-card-workers,
+#upcoming-jobs-section .job-card-workers,
+#completed-jobs-section .job-card-workers {
+  font-size: 0.85rem;
+  color: #374151;
+  margin-top: 0.55rem;
+  padding-top: 0.55rem;
+  border-top: 1px dashed #e5e7eb;
+  text-align: left;
+}
+
+#open-jobs-section .job-card-workers::before,
+#upcoming-jobs-section .job-card-workers::before,
+#completed-jobs-section .job-card-workers::before {
+  content: "NOTES";
+  display: block;
+  margin-bottom: 0.2rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--orange-dark);
+}
+
+/* Generic clean small button (worker confirm/decline) */
+button.small {
+  padding: 0.45rem 1rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid rgba(0,0,0,0.08);
+  background: linear-gradient(145deg, #ffffff, #f3f4f6);
+  color: #1f2937;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  transition: all 0.15s ease;
+}
+
+button.small:hover {
+  background: #ffffff;
+  border-color: rgba(0,0,0,0.12);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
+/* Confirm (green) */
+button.small.confirm {
+  background: linear-gradient(145deg, #dcfce7, #bbf7d0);
+  border-color: #86efac;
+  color: #166534;
+}
+
+/* Decline (red) */
+button.small.danger {
+  background: linear-gradient(145deg, #fee2e2, #fecaca);
+  border-color: #fca5a5;
+  color: #991b1b;
+}
+
+/* FIX — Keep Confirm/Decline centered in OPEN JOBS */
+#open-jobs-section .job-card > div:last-of-type {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 0.8rem;
+}
+
+/* ==================================================================== */
+/* UPCOMING SHIFTS – show 3 by default, expand to scroll for more       */
+/* ==================================================================== */
+
+/* By default: only show the first 3 upcoming job cards */
+#upcoming-jobs-section:not(.expanded) #upcoming-jobs .job-card:nth-child(n+4) {
+  display: none;
+}
+
+/* When expanded: show all job cards */
+#upcoming-jobs-section.expanded #upcoming-jobs .job-card {
+  display: block;
+}
+
+/* When expanded: keep height reasonable and scroll extra shifts */
+#upcoming-jobs-section.expanded #upcoming-jobs {
+  max-height: 320px;        /* roughly ~5 cards tall */
+  overflow-y: auto;
+  padding-right: 0.25rem;   /* little room for scrollbar */
+}
+
+/* Toggle button underneath the list */
+.upcoming-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0.4rem auto 0;
+  padding: 0.15rem 0.4rem;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.upcoming-toggle .caret {
+  transition: transform 0.16s ease;
+  font-size: 0.75rem;
+}
+
+/* Rotate caret when expanded */
+#upcoming-jobs-section.expanded .upcoming-toggle .caret {
+  transform: rotate(180deg);
+}
+
+/* Center the "Viewing schedule for: ___" line */
+.worker-meta-centered {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text-main);
+  font-weight: 400;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* ==== WORKER PORTAL – ensure all upcoming shifts are visible ==== */
+#upcoming-jobs-section {
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+#upcoming-jobs {
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* Center the "See All Jobs" button at the bottom of the Schedule Overview card */
+#schedule-overview-section .see-all-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+}
+
+/* Fix See All Jobs button alignment inside Upcoming Jobs */
+#upcoming-jobs-section .see-all-wrapper {
+  margin-top: 0.75rem;
+  text-align: center;
+}
+
+#upcoming-jobs-section .see-all-link {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.82rem;
+}
+
+#see-all-jobs-btn {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Add breathing room under the overview job list */
+#next-jobs {
+  margin-bottom: 1rem;   /* adjust 1rem → 0.75rem or 1.2rem as needed */
+}
+
+
+/* Make See All Jobs + Add Worker match Auto-Fill style exactly */
+#see-all-jobs-btn,
+#add-worker-btn {
+  border-radius: 14px;
+  padding: 0.55rem 1.6rem;
+  font-size: 0.9rem;
+  background: linear-gradient(145deg, #ffffff, #f3f4f6);
+  color: #1f2937;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+#see-all-jobs-btn:hover,
+#add-worker-btn:hover {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+}
+
+/* Center the "Next 3 upcoming jobs." line in Schedule Overview */
+#schedule-overview-section > p {
+  text-align: center;
+}
+
+/* ==================================================================== */
+/* WORKER PORTAL – SMS toast notification                               */
+/* ==================================================================== */
+
+#sms-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.15rem;
+  transform: translateX(-50%) translateY(12px);
+  z-index: 999;
+  max-width: 90%;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.82rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.94); /* dark slate */
+  color: #f9fafb;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.18s ease-out,
+    transform 0.2s ease-out;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#sms-toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Slight tweak for very small screens */
+@media (max-width: 480px) {
+  #sms-toast {
+    font-size: 0.78rem;
+    padding: 0.35rem 0.7rem;
+  }
+}
+
+/* ==================================================================== */
+/* WORKER PORTAL — Phone number row                                      */
+/* ==================================================================== */
+
+.worker-phone-row {
+  margin-top: 0.4rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Pill-style phone input */
+.worker-phone-input {
+  max-width: 240px;
+  width: 100%;
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 0.9rem;
+  text-align: center;
+  outline: none;
+}
+
+.worker-phone-input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Small “Save” pill button */
+.worker-phone-save-btn {
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: none; /* JS will show when needed */
+}
+
+.worker-phone-save-btn:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+/* Worker portal phone input override for readability */
+#worker-phone-input {
+  color: #333;
+  background-color: #ffffff;
+}
+
+#worker-phone-input::placeholder {
+  color: #999;
+}
+
+#worker-phone-input:focus {
+  color: #333;
+  background-color: #ffffff;
+}
