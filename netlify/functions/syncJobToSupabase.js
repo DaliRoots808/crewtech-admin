@@ -62,9 +62,7 @@ exports.handler = async (event) => {
     updated_at: job.updated_at
   };
 
-  if (looksLikeUuid(job.id)) {
-    payload.id = job.id;
-  }
+  payload.id = job.id;
 
   console.log('[syncJobToSupabase] payload to Supabase:', {
     ...payload,
