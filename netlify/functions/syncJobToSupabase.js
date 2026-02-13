@@ -71,7 +71,22 @@ if (rawText !== undefined) payload.raw_text = rawText;
 
 // assignments: accept either worker_assignments or assignments; only include if provided
 const assignments = (job.worker_assignments !== undefined) ? job.worker_assignments : job.assignments;
-if (assignments !== undefined) payload.worker_assignments = assignments;
+if (assignments !== undefined) {
+  const normalizeStatus = (v) => {
+    const c = String(v || '').trim().toLowerCase();
+    if (c === 'confirmed') return 'Confirmed';
+    if (c === 'declined') return 'Declined';
+    if (c === 'invited') return 'Invited';
+    return v; // leave unknown statuses as-is
+  };
+
+  payload.worker_assignments = Array.isArray(assignments)
+    ? assignments.map((a) => ({
+        ...a,
+        status: normalizeStatus(a && a.status)
+      }))
+    : assignments;
+}
 
 const workLog = (job.finalized_work_log !== undefined) ? job.finalized_work_log : job.finalizedWorkLog;
 if (workLog !== undefined) payload.finalized_work_log = workLog;
