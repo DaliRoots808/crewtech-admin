@@ -158,7 +158,7 @@ function getAssignments(job) {
 }
 
 function shortStatus(code) {
-  const c = (code || '').toLowerCase();
+  const c = String(code || '').trim().toLowerCase();
   if (c === 'confirmed') return 'confirmed';
   if (c === 'invited') return 'invited';
   if (c === 'declined') return 'declined';
@@ -316,7 +316,7 @@ async function syncJobToSupabaseFromWorker(job) {
     const res = await fetch("/.netlify/functions/syncJobToSupabase", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ job })
+      body: JSON.stringify({ job: { id: job.id, assignments: job.assignments } })
     });
     const json = await res.json().catch(() => null);
     if (!res.ok || !json || !json.success) {
@@ -774,10 +774,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           const assignments = getAssignments(job);
           let a = assignments.find((a) => a.workerId === workerId);
           if (!a) {
-            a = { workerId, status: 'confirmed' };
+            a = { workerId, status: 'Confirmed' };
             assignments.push(a);
           } else {
-            a.status = 'confirmed';
+            a.status = 'Confirmed';
           }
           await syncJobToSupabaseFromWorker(job);
 
