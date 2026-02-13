@@ -310,6 +310,24 @@ async function refreshJobsFromSupabaseIfAvailable(data) {
   }
 }
 
+async function syncJobToSupabaseFromWorker(job) {
+  try {
+    if (["localhost","127.0.0.1"].includes(window.location.hostname)) return;
+    const res = await fetch("/.netlify/functions/syncJobToSupabase", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ job })
+    });
+    const json = await res.json().catch(() => null);
+    if (!res.ok || !json || !json.success) {
+      console.warn("[Worker portal] syncJobToSupabase failed", res.status, json);
+    }
+  } catch (err) {
+    console.warn("[Worker portal] syncJobToSupabase error", err);
+  }
+}
+
+
 function updateSmsPreferenceRow(worker) {
   const labelEl = smsPrefLabel || document.getElementById('sms-pref-label');
   const toggleEl = smsToggle || document.getElementById('sms-opt-in-toggle');
@@ -752,7 +770,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         declineBtn.className = 'small danger';
         declineBtn.textContent = 'Decline';
 
-        confirmBtn.addEventListener('click', () => {
+        confirmBtn.addEventListener('click', async () => {
           const assignments = getAssignments(job);
           let a = assignments.find((a) => a.workerId === workerId);
           if (!a) {
@@ -761,11 +779,13 @@ document.addEventListener('DOMContentLoaded', async () => {
           } else {
             a.status = 'confirmed';
           }
+          await syncJobToSupabaseFromWorker(job);
+
           saveData(data);
           refreshAll();
         });
 
-        declineBtn.addEventListener('click', () => {
+        declineBtn.addEventListener('click', async () => {
           const assignments = getAssignments(job);
           let a = assignments.find((a) => a.workerId === workerId);
           if (!a) {
@@ -774,6 +794,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           } else {
             a.status = 'declined';
           }
+          await syncJobToSupabaseFromWorker(job);
+
           saveData(data);
           refreshAll();
         });
