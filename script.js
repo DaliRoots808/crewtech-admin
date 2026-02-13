@@ -1131,6 +1131,8 @@ function renderJobGroups(container, jobs, data, options = {}) {
                 assignment.status = opt.value;
                 job.assignedWorkerIds = job.assignments.map((a) => a.workerId);
                 saveData(data);
+                if (!["localhost","127.0.0.1"].includes(window.location.hostname)) syncJobToSupabaseClient(job);
+
                 if (window._crewtechRerenderAll) window._crewtechRerenderAll();
               });
 
