@@ -291,6 +291,25 @@ async function upsertWorkerToSupabaseIfAvailable(worker) {
   }
 }
 
+
+async function refreshJobsFromSupabaseIfAvailable(data) {
+  try {
+    if (["localhost","127.0.0.1"].includes(window.location.hostname)) return;
+    const res = await fetch("/.netlify/functions/getJobsFromSupabase", { cache: "no-store" });
+    const json = await res.json().catch(() => null);
+    if (!res.ok || !json || !Array.isArray(json.jobs)) {
+      console.warn("[Worker portal] getJobsFromSupabase failed", res.status, json);
+      return;
+    }
+    if (data && typeof data === "object") {
+      data.jobs = json.jobs;
+      saveData(data);
+    }
+  } catch (err) {
+    console.warn("[Worker portal] refreshJobsFromSupabase error", err);
+  }
+}
+
 function updateSmsPreferenceRow(worker) {
   const labelEl = smsPrefLabel || document.getElementById('sms-pref-label');
   const toggleEl = smsToggle || document.getElementById('sms-opt-in-toggle');
@@ -325,6 +344,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const meta = byId('worker-meta');
   phoneInput = byId('worker-phone-input');
   phoneSaveBtn = byId('worker-phone-save-btn');
+
   phoneRowEl = byId('worker-phone-row');
   const phoneInputEl = phoneInput;
   const phoneSaveBtnEl = phoneSaveBtn;
@@ -346,6 +366,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const data = loadData();
   smsPrefLabel = byId('sms-pref-label');
   smsToggle = byId('sms-opt-in-toggle');
+  await refreshJobsFromSupabaseIfAvailable(data);
+
   // --- Worker from URL ---
   const url = new URL(window.location.href);
   const workerId = url.searchParams.get('workerId');
