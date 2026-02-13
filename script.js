@@ -1115,6 +1115,7 @@ function renderJobGroups(container, jobs, data, options = {}) {
             pills.className = 'status-pills';
 
             const current = assignment.status || 'Invited';
+            const currentNorm = String(current).trim().toLowerCase();
 
             [
               { value: 'Invited', label: 'Invited', cls: 'invited' },
@@ -1123,7 +1124,7 @@ function renderJobGroups(container, jobs, data, options = {}) {
             ].forEach((opt) => {
               const pill = document.createElement('span');
               pill.className = 'status-pill ' + opt.cls;
-              if (current === opt.value) pill.classList.add('active');
+              if (currentNorm === String(opt.value).trim().toLowerCase()) pill.classList.add('active');
               pill.textContent = opt.label;
 
               pill.addEventListener('click', (e) => {
