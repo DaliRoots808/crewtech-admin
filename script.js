@@ -82,6 +82,252 @@ function getBaseWorkerUrl() {
   return `${origin}${basePath}/worker.html`;
 }
 
+// ===== SMS Queue Helpers (local SMS composer) =====
+function buildWorkerInviteSmsMessage(job, worker) {
+  var base = getBaseWorkerUrl();
+  var link = base + '?workerId=' + encodeURIComponent(worker.id);
+  var when = ((job.date || '') + ' ' + (job.startTime || '') + '-' + (job.endTime || '')).trim();
+  return 'CrewTech: ' + (job.name || 'Job') + ' on ' + when + '. View details & confirm: ' + link;
+}
+
+function openSmsComposer(phone, message) {
+  var to = String(phone || '').trim();
+  if (!to) {
+    alert('Missing worker phone number.');
+    return false;
+  }
+  var body = encodeURIComponent(String(message || ''));
+  // iOS commonly supports sms:NUMBER&body=...
+  window.location.href = 'sms:' + encodeURIComponent(to) + '&body=' + body;
+  return true;
+}
+
+function buildSmsQueueForJob(job, data) {
+  return getAssignments(job)
+    .map(function (a) {
+      var w = (data.workers || []).find(function (ww) {
+        return ww.id === a.workerId;
+      });
+      if (!w || !w.phone) return null;
+      return {
+        workerId: w.id,
+        name: w.name || '(no name)',
+        phone: w.phone,
+        message: buildWorkerInviteSmsMessage(job, w),
+        status: 'pending'
+      };
+    })
+    .filter(Boolean);
+}
+
+
+
+// ===== SMS Queue Modal (manual SMS sending) =====
+function showSmsQueueModal(job, queue) {
+  // Remove any existing modal
+  var existing = document.getElementById('sms-queue-modal');
+  if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
+
+  var overlay = document.createElement('div');
+  overlay.id = 'sms-queue-modal';
+  overlay.style.position = 'fixed';
+  overlay.style.left = '0';
+  overlay.style.top = '0';
+  overlay.style.right = '0';
+  overlay.style.bottom = '0';
+  overlay.style.background = 'rgba(0,0,0,0.55)';
+  overlay.style.zIndex = '9999';
+  overlay.style.display = 'flex';
+  overlay.style.alignItems = 'center';
+  overlay.style.justifyContent = 'center';
+  overlay.style.padding = '16px';
+
+  var card = document.createElement('div');
+  card.style.width = 'min(720px, 96vw)';
+  card.style.maxHeight = '86vh';
+  card.style.overflow = 'auto';
+  card.style.background = '#fff';
+  card.style.borderRadius = '18px';
+  card.style.boxShadow = '0 20px 60px rgba(0,0,0,0.25)';
+  card.style.padding = '14px';
+
+  var title = document.createElement('div');
+  title.style.fontWeight = '700';
+  title.style.fontSize = '16px';
+  title.style.marginBottom = '6px';
+  title.textContent = 'Send SMS Invites (Manual)';
+
+  var subtitle = document.createElement('div');
+  subtitle.style.fontSize = '13px';
+  subtitle.style.color = '#6b7280';
+  subtitle.style.marginBottom = '10px';
+
+  var jobLine = (job && job.name ? job.name : 'Job') + ' • ' + (job && job.date ? job.date : '');
+  subtitle.textContent = jobLine;
+
+  var progress = document.createElement('div');
+  progress.style.fontSize = '13px';
+  progress.style.margin = '10px 0 12px 0';
+  progress.style.padding = '10px';
+  progress.style.border = '1px solid #e5e7eb';
+  progress.style.borderRadius = '12px';
+  progress.style.background = '#f9fafb';
+
+  function countDone() {
+    var done = 0;
+    for (var i = 0; i < queue.length; i++) {
+      if (queue[i].status === 'sent' || queue[i].status === 'skipped') done++;
+    }
+    return done;
+  }
+
+  function renderProgress() {
+    var done = countDone();
+    progress.textContent = 'Progress: ' + done + ' / ' + queue.length;
+  }
+
+  var list = document.createElement('div');
+
+  function renderList() {
+    list.innerHTML = '';
+
+    if (!queue.length) {
+      var p = document.createElement('p');
+      p.className = 'muted';
+      p.textContent = 'No workers with phone numbers on this job.';
+      list.appendChild(p);
+      renderProgress();
+      return;
+    }
+
+    queue.forEach(function (item, idx) {
+      var row = document.createElement('div');
+      row.style.display = 'flex';
+      row.style.gap = '10px';
+      row.style.alignItems = 'center';
+      row.style.justifyContent = 'space-between';
+      row.style.padding = '10px';
+      row.style.border = '1px solid #e5e7eb';
+      row.style.borderRadius = '12px';
+      row.style.marginBottom = '8px';
+      row.style.background = item.status === 'sent'
+        ? '#ecfdf5'
+        : item.status === 'skipped'
+        ? '#f3f4f6'
+        : '#ffffff';
+
+      var left = document.createElement('div');
+      left.style.display = 'flex';
+      left.style.flexDirection = 'column';
+      left.style.gap = '2px';
+
+      var name = document.createElement('div');
+      name.style.fontWeight = '700';
+      name.style.fontSize = '14px';
+      name.textContent = (idx + 1) + ') ' + (item.name || '(no name)');
+
+      var phone = document.createElement('div');
+      phone.style.fontSize = '12px';
+      phone.style.color = '#6b7280';
+      phone.textContent = item.phone || '';
+
+      var status = document.createElement('div');
+      status.style.fontSize = '12px';
+      status.style.color = '#6b7280';
+      status.textContent =
+        item.status === 'sent' ? 'Sent' : item.status === 'skipped' ? 'Skipped' : 'Pending';
+
+      left.appendChild(name);
+      left.appendChild(phone);
+      left.appendChild(status);
+
+      var right = document.createElement('div');
+      right.style.display = 'flex';
+      right.style.gap = '8px';
+      right.style.flexWrap = 'wrap';
+      right.style.justifyContent = 'flex-end';
+
+      var sendBtn = document.createElement('button');
+      sendBtn.className = 'secondary small';
+      sendBtn.textContent = 'Send SMS';
+      sendBtn.disabled = item.status === 'sent' || item.status === 'skipped';
+
+      sendBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        // Open the native SMS composer (user hits Send there)
+        openSmsComposer(item.phone, item.message);
+        // We can't detect if user actually sent, so we mark as sent once opened
+        item.status = 'sent';
+        renderList();
+        renderProgress();
+      });
+
+      var skipBtn = document.createElement('button');
+      skipBtn.className = 'small';
+      skipBtn.textContent = 'Skip';
+      skipBtn.disabled = item.status === 'sent' || item.status === 'skipped';
+
+      skipBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        item.status = 'skipped';
+        renderList();
+        renderProgress();
+      });
+
+      right.appendChild(sendBtn);
+      right.appendChild(skipBtn);
+
+      row.appendChild(left);
+      row.appendChild(right);
+      list.appendChild(row);
+    });
+
+    renderProgress();
+  }
+
+  var footer = document.createElement('div');
+  footer.style.display = 'flex';
+  footer.style.justifyContent = 'space-between';
+  footer.style.gap = '10px';
+  footer.style.marginTop = '12px';
+
+  var closeBtn = document.createElement('button');
+  closeBtn.className = 'danger small';
+  closeBtn.textContent = 'Done / Close';
+  closeBtn.addEventListener('click', function () {
+    if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+  });
+
+  var hint = document.createElement('div');
+  hint.style.fontSize = '12px';
+  hint.style.color = '#6b7280';
+  hint.style.alignSelf = 'center';
+  hint.textContent = 'Tip: tap “Send SMS”, send in Messages, then come back here for the next worker.';
+
+  footer.appendChild(hint);
+  footer.appendChild(closeBtn);
+
+  card.appendChild(title);
+  card.appendChild(subtitle);
+  card.appendChild(progress);
+  card.appendChild(list);
+  card.appendChild(footer);
+
+  overlay.appendChild(card);
+  document.body.appendChild(overlay);
+
+  // Close when tapping the dark overlay (mobile-friendly)
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay) {
+      if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    }
+  });
+
+  renderList();
+  renderProgress();
+}
+
+
 /* ========== Assignment / Phase Helpers ========== */
 function getAssignments(job) {
   if (!job.assignments || !Array.isArray(job.assignments)) {
@@ -915,6 +1161,16 @@ function renderJobGroups(container, jobs, data, options = {}) {
         if (window._crewtechRerenderAll) window._crewtechRerenderAll();
       });
 
+      const smsQueueBtn = document.createElement('button');
+      smsQueueBtn.className = 'secondary small';
+      smsQueueBtn.textContent = 'SMS Queue';
+      smsQueueBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const queue = buildSmsQueueForJob(job, data);
+        showSmsQueueModal(job, queue);
+      });
+
+      actions.appendChild(smsQueueBtn);
       actions.appendChild(deleteBtn);
       details.appendChild(actions);
 
@@ -1573,8 +1829,9 @@ document.addEventListener('DOMContentLoaded', () => {
         reportCompleted: false
       });
 
-      syncJobToSupabaseClient(job);
-    });
+      if (!["localhost","127.0.0.1"].includes(window.location.hostname)) {
+        syncJobToSupabaseClient(job);
+      }    });
 
     console.log('[Seed] Demo workers/jobs created for testing.');
   }
@@ -1707,6 +1964,52 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('Error refreshing workers from Supabase:', err);
     }
   }
+
+  async function refreshJobsFromSupabase() {
+    try {
+      const res = await fetch("/.netlify/functions/getJobsFromSupabase");
+      if (!res.ok) {
+        console.warn("Supabase jobs fetch failed with status", res.status);
+        return;
+      }
+
+      const payload = await res.json();
+      if (!payload || !Array.isArray(payload.jobs) || !payload.jobs.length) {
+        console.log("Supabase jobs: no rows returned, keeping local jobs.");
+        return;
+      }
+
+      data.jobs = payload.jobs.map((j) => ({
+        id: j.id,
+        name: j.name || "",
+        jobName: j.jobName ?? null,
+        jobNameMinimal: j.jobNameMinimal ?? null,
+        date: j.date || "",
+        startTime: j.startTime || "",
+        endTime: j.endTime || "",
+        booth: j.booth || "",
+        boothNumber: j.boothNumber ?? null,
+        location: j.location || "",
+        phase: j.phase || "",
+        jobPhase: j.jobPhase ?? null,
+        notes: j.notes || "",
+        rawText: j.rawText || "",
+        assignments: j.assignments ?? null,
+        finalizedWorkLog: j.finalizedWorkLog ?? null,
+        finalizedNotes: j.finalizedNotes ?? null,
+        reportCompleted: j.reportCompleted ?? false,
+        createdAt: j.createdAt ?? null,
+        updatedAt: j.updatedAt ?? null
+      }));
+
+      saveData(data);
+      rerenderAll();
+      console.log(`Supabase jobs loaded: ${data.jobs.length}`);
+    } catch (err) {
+      console.error("Error refreshing jobs from Supabase:", err);
+    }
+  }
+
 
   if (shiftSelector) {
     shiftSelector.addEventListener('click', (e) => {
@@ -2438,7 +2741,7 @@ Notes: Evan (client) prefers text update 30 min before arrival.`
       }
 
       if (
-        !confirm('Create job and send SMS invites to selected workers?')
+        !confirm('Create job and open SMS Queue to send invites?')
       ) {
         return;
       }
@@ -2462,7 +2765,13 @@ Notes: Evan (client) prefers text update 30 min before arrival.`
         reportCompleted: false
       });
 
-      const smsResult = await sendSmsInvitesForJob(job);
+      const queue = buildSmsQueueForJob(job, data);
+
+      // Always show the modal (it will display “no workers with phone numbers” if empty)
+      showSmsQueueModal(job, queue);
+
+      // For the existing alerts below (minimal change):
+      const smsResult = queue.length ? { skipped: false, failures: 0 } : { skipped: true };
 
       document.getElementById('job-name').value = '';
       document.getElementById('job-date').value = '';
@@ -2479,15 +2788,11 @@ Notes: Evan (client) prefers text update 30 min before arrival.`
 
       if (smsResult?.skipped) {
         alert('Job created, but no worker phone numbers to text.');
-      } else if (smsResult?.failures) {
-        alert(
-          `Job created; SMS sent with ${smsResult.failures} error(s). Check Netlify function logs for details.`
-        );
-      } else {
-        alert('Job created and SMS invites sent!');
       }
 
-      syncJobToSupabaseClient(job);
+      if (!["localhost","127.0.0.1"].includes(window.location.hostname)) {
+        syncJobToSupabaseClient(job);
+      }
     });
   }
 
@@ -2822,8 +3127,9 @@ Notes: Evan (client) prefers text update 30 min before arrival.`
       job.reportCompleted = true;
       saveData(data);
       rerenderAll();
-      syncJobToSupabaseClient(job);
-
+      if (!["localhost","127.0.0.1"].includes(window.location.hostname)) {
+        syncJobToSupabaseClient(job);
+      }
       finalizeJobSelect.value = '';
       finalizeWorkersContainer.innerHTML =
         '<p class="muted">Job finalized. Pick another job to finalize.</p>';
@@ -2889,6 +3195,7 @@ Notes: Evan (client) prefers text update 30 min before arrival.`
   window._crewtechRerenderAll = rerenderAll;
   rerenderAll();
   refreshWorkersFromSupabase();
+  refreshJobsFromSupabase();
 
   /* ---- Splash screen ---- */
   const splash = document.getElementById('splash-overlay');
