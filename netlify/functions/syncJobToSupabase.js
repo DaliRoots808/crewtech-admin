@@ -40,29 +40,52 @@ exports.handler = async (event) => {
     };
   }
 
-  const payload = {
-    name: job.name,
-    jobName: job.jobName,
-    jobNameMinimal: job.jobNameMinimal,
-    date: job.date,
-    start_time: job.start_time ?? job.startTime ?? null,
-    end_time: job.end_time ?? job.endTime ?? null,
-    booth: job.booth,
-    boothNumber: job.boothNumber,
-    location: job.location,
-    phase: job.phase,
-    jobPhase: job.jobPhase,
-    notes: job.notes,
-    raw_text: job.raw_text,
-    worker_assignments: job.worker_assignments ?? job.assignments ?? null,
-    finalized_work_log: job.finalized_work_log ?? job.finalizedWorkLog ?? null,
-    finalized_notes: job.finalized_notes ?? job.finalizedNotes ?? null,
-    report_completed: job.report_completed ?? job.reportCompleted ?? false,
-    created_at: job.created_at,
-    updated_at: job.updated_at
-  };
+  const payload = {};
 
-  payload.id = job.id;
+// Only set fields that were actually provided.
+// This prevents "partial updates" from overwriting NOT NULL columns with null.
+
+payload.id = job.id;
+
+if (job.name !== undefined) payload.name = job.name;
+if (job.jobName !== undefined) payload.jobName = job.jobName;
+if (job.jobNameMinimal !== undefined) payload.jobNameMinimal = job.jobNameMinimal;
+if (job.date !== undefined) payload.date = job.date;
+
+// Times: only include if provided (avoid nulling NOT NULL columns)
+const start = (job.start_time !== undefined) ? job.start_time : job.startTime;
+const end   = (job.end_time   !== undefined) ? job.end_time   : job.endTime;
+if (start !== undefined) payload.start_time = start;
+if (end !== undefined) payload.end_time = end;
+
+if (job.booth !== undefined) payload.booth = job.booth;
+if (job.boothNumber !== undefined) payload.boothNumber = job.boothNumber;
+if (job.location !== undefined) payload.location = job.location;
+if (job.phase !== undefined) payload.phase = job.phase;
+if (job.jobPhase !== undefined) payload.jobPhase = job.jobPhase;
+if (job.notes !== undefined) payload.notes = job.notes;
+
+// raw_text: accept either raw_text or rawText; only include if provided
+const rawText = (job.raw_text !== undefined) ? job.raw_text : job.rawText;
+if (rawText !== undefined) payload.raw_text = rawText;
+
+// assignments: accept either worker_assignments or assignments; only include if provided
+const assignments = (job.worker_assignments !== undefined) ? job.worker_assignments : job.assignments;
+if (assignments !== undefined) payload.worker_assignments = assignments;
+
+const workLog = (job.finalized_work_log !== undefined) ? job.finalized_work_log : job.finalizedWorkLog;
+if (workLog !== undefined) payload.finalized_work_log = workLog;
+
+const finNotes = (job.finalized_notes !== undefined) ? job.finalized_notes : job.finalizedNotes;
+if (finNotes !== undefined) payload.finalized_notes = finNotes;
+
+// report_completed: only include if provided; do NOT default to false on partial updates
+const reportCompleted = (job.report_completed !== undefined) ? job.report_completed : job.reportCompleted;
+if (reportCompleted !== undefined) payload.report_completed = reportCompleted;
+
+if (job.created_at !== undefined) payload.created_at = job.created_at;
+if (job.updated_at !== undefined) payload.updated_at = job.updated_at;
+
 
   console.log('[syncJobToSupabase] payload to Supabase:', {
     ...payload,
