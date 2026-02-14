@@ -114,7 +114,7 @@ if (job.updated_at !== undefined) payload.updated_at = job.updated_at;
   if (isAssignmentsOnly) {
     try {
       const patchRes = await fetch(
-        `${SUPABASE_URL}/rest/v1/jobs?id=eq.${encodeURIComponent(payload.id)}`,
+        `${SUPABASE_URL}/rest/v1/jobs?id=eq.${encodeURIComponent(payload.id)}&select=id`,
         {
           method: 'PATCH',
           headers: {
