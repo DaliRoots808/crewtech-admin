@@ -334,7 +334,9 @@ function getAssignments(job) {
     const baseIds = job.assignedWorkerIds || [];
     job.assignments = baseIds.map((id) => ({ workerId: id, status: '' }));
   }
-  job.assignedWorkerIds = job.assignments.map((a) => a.workerId);
+  // Keep assignedWorkerIds in sync safely (job.assignments may be null on Supabase-sourced jobs)
+                job.assignments = Array.isArray(job.assignments) ? job.assignments : assignments;
+                job.assignedWorkerIds = (job.assignments || []).map((a) => a.workerId);
   return job.assignments;
 }
 
