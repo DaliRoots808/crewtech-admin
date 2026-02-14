@@ -105,7 +105,7 @@ if (job.updated_at !== undefined) payload.updated_at = job.updated_at;
 
   
   // Guard: if this request only updates assignments, do NOT allow it to create a brand-new blank job row.
-  // This happens when the Worker portal confirms/declines before the Admin has created/synced the full job.
+  // Instead, PATCH the existing row. If it doesn't exist, reject.
   const keys = Object.keys(payload);
   const isAssignmentsOnly =
     keys.every((k) => k === 'id' || k === 'worker_assignments') &&
@@ -113,23 +113,27 @@ if (job.updated_at !== undefined) payload.updated_at = job.updated_at;
 
   if (isAssignmentsOnly) {
     try {
-      const existsRes = await fetch(
-        `${SUPABASE_URL}/rest/v1/jobs?id=eq.${encodeURIComponent(payload.id)}&select=id`,
+      const patchRes = await fetch(
+        `${SUPABASE_URL}/rest/v1/jobs?id=eq.${encodeURIComponent(payload.id)}`,
         {
-          method: 'GET',
+          method: 'PATCH',
           headers: {
             apikey: SUPABASE_SERVICE_ROLE_KEY,
-            Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`
-          }
+            Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+            'Content-Type': 'application/json',
+            Prefer: 'return=representation'
+          },
+          body: JSON.stringify({ worker_assignments: payload.worker_assignments })
         }
       );
 
-      const existsText = await existsRes.text();
-      let existsJson = [];
-      try { existsJson = existsText ? JSON.parse(existsText) : []; } catch (e) { existsJson = []; }
+      const patchText = await patchRes.text();
+      let patchJson = null;
+      try { patchJson = patchText ? JSON.parse(patchText) : null; } catch (e) { patchJson = null; }
 
-      if (!existsRes.ok || !Array.isArray(existsJson) || existsJson.length === 0) {
-        console.warn('[syncJobToSupabase] assignments-only update rejected (job does not exist yet):', payload.id);
+      // If no row returned, the job doesn't exist (or something blocked it)
+      if (!patchRes.ok || !Array.isArray(patchJson) || patchJson.length === 0) {
+        console.warn('[syncJobToSupabase] assignments-only PATCH rejected (job does not exist yet):', payload.id);
         return {
           statusCode: 400,
           body: JSON.stringify({
@@ -138,22 +142,23 @@ if (job.updated_at !== undefined) payload.updated_at = job.updated_at;
           })
         };
       }
+
+      const row = patchJson[0];
+      console.log('[syncJobToSupabase] assignments-only PATCH success', row?.id || payload.id);
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ success: true, row })
+      };
     } catch (err) {
-      console.error('[syncJobToSupabase] assignments-only preflight check failed', err);
+      console.error('[syncJobToSupabase] assignments-only PATCH failed', err);
       return {
         statusCode: 500,
-        body: JSON.stringify({ success: false, error: 'Preflight check failed' })
+        body: JSON.stringify({ success: false, error: 'Assignments-only PATCH failed' })
       };
     }
   }
 
-console.log('[syncJobToSupabase] payload to Supabase:', {
-    ...payload,
-    id: payload.id ? '[uuid-present]' : '[omitted]'
-  });
-
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/jobs`, {
+const res = await fetch(`${SUPABASE_URL}/rest/v1/jobs`, {
       method: 'POST',
       headers: {
         apikey: SUPABASE_SERVICE_ROLE_KEY,
