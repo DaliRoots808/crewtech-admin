@@ -1160,7 +1160,7 @@ saveData(data);
 
 // Sync minimal payload so Supabase can’t accidentally overwrite other fields
 if (!["localhost","127.0.0.1"].includes(window.location.hostname)) {
-  syncJobToSupabaseClient({ id: job.id, assignments: job.assignments });
+  if (window.syncJobToSupabaseClient) window.syncJobToSupabaseClient({ id: job.id, assignments: job.assignments }); else console.warn('[Admin] syncJobToSupabaseClient missing on window');
 }
 
                 if (window._crewtechRerenderAll) window._crewtechRerenderAll();
@@ -1985,6 +1985,8 @@ document.addEventListener('DOMContentLoaded', () => {
       console.warn('[Supabase sync] job upsert error', err);
     }
   }
+
+  window.syncJobToSupabaseClient = syncJobToSupabaseClient;
 
   async function refreshWorkersFromSupabase() {
     try {
