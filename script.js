@@ -330,13 +330,17 @@ function showSmsQueueModal(job, queue) {
 
 /* ========== Assignment / Phase Helpers ========== */
 function getAssignments(job) {
-  if (!job.assignments || !Array.isArray(job.assignments)) {
+  if (!Array.isArray(job.assignments)) {
     const baseIds = job.assignedWorkerIds || [];
-    job.assignments = baseIds.map((id) => ({ workerId: id, status: '' }));
+    job.assignments = baseIds.map((id) => ({
+      workerId: id,
+      status: ''
+    }));
   }
-  // Keep assignedWorkerIds in sync safely (job.assignments may be null on Supabase-sourced jobs)
-                job.assignments = Array.isArray(job.assignments) ? job.assignments : assignments;
-                job.assignedWorkerIds = (job.assignments || []).map((a) => a.workerId);
+
+  // Always keep assignedWorkerIds in sync
+  job.assignedWorkerIds = job.assignments.map((a) => a.workerId);
+
   return job.assignments;
 }
 
