@@ -1120,7 +1120,8 @@ function renderJobGroups(container, jobs, data, options = {}) {
             [
               { value: 'Invited', label: 'Invited', cls: 'invited' },
               { value: 'Confirmed', label: 'Confirmed', cls: 'confirmed' },
-              { value: 'Declined', label: 'Declined', cls: 'declined' }
+              { value: 'Declined', label: 'Declined', cls: 'declined' },
+              { value: 'Cancelled', label: 'Cancelled', cls: 'cancelled' }
             ].forEach((opt) => {
               const pill = document.createElement('span');
               pill.className = 'status-pill ' + opt.cls;
@@ -1129,6 +1130,12 @@ function renderJobGroups(container, jobs, data, options = {}) {
 
               pill.addEventListener('click', (e) => {
                 e.stopPropagation();
+
+                if (opt.value === 'Cancelled') {
+                  const ok = confirm('Cancel this worker for this job? (Use Add Worker if you need a replacement.)');
+                  if (!ok) return;
+                }
+
                 assignment.status = opt.value;
                 job.assignedWorkerIds = job.assignments.map((a) => a.workerId);
                 saveData(data);
