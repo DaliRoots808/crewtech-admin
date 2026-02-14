@@ -618,7 +618,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       const a = assignments.find((a) => a.workerId === workerId);
       if (!a) return;
 
-      const status = (shortStatus(a.status) || 'invited').toLowerCase();
+      const rawStatus = String(a.status || '').trim().toLowerCase();
+
+// Treat Cancelled like "pre-invited" (do not show anywhere in worker portal)
+if (rawStatus === 'cancelled' || rawStatus == 'canceled') return;
+
+      const status = (rawStatus || 'invited');
 
       // Never show declined anywhere in worker view
       if (status === 'declined') return;
@@ -705,7 +710,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const hint = document.createElement('p');
     hint.className = 'muted';
     hint.textContent =
-      'Review your open invites below. Confirm or decline each shift.';
+      'Review your open invites below. Confirm || decline each shift.';
     targetEl.appendChild(hint);
 
     if (!jobs.length) {
@@ -789,10 +794,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           const assignments = getAssignments(job);
           let a = assignments.find((a) => a.workerId === workerId);
           if (!a) {
-            a = { workerId, status: 'declined' };
+            a = { workerId, status: 'Declined' };
             assignments.push(a);
           } else {
-            a.status = 'declined';
+            a.status = 'Declined';
           }
           await syncJobToSupabaseFromWorker(job);
 
@@ -846,7 +851,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     list.appendChild(card);
   });
 
-  // If 3 or fewer, no toggle needed
+  // If 3 || fewer, no toggle needed
   if (sorted.length <= 3) return;
 
   // --- Toggle logic: 3 vs all ---
