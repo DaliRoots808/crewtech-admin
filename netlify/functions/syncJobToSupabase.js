@@ -103,7 +103,51 @@ if (job.created_at !== undefined) payload.created_at = job.created_at;
 if (job.updated_at !== undefined) payload.updated_at = job.updated_at;
 
 
-  console.log('[syncJobToSupabase] payload to Supabase:', {
+  
+  // Guard: if this request only updates assignments, do NOT allow it to create a brand-new blank job row.
+  // This happens when the Worker portal confirms/declines before the Admin has created/synced the full job.
+  const keys = Object.keys(payload);
+  const isAssignmentsOnly =
+    keys.every((k) => k === 'id' || k === 'worker_assignments') &&
+    payload.worker_assignments !== undefined;
+
+  if (isAssignmentsOnly) {
+    try {
+      const existsRes = await fetch(
+        `${SUPABASE_URL}/rest/v1/jobs?id=eq.${encodeURIComponent(payload.id)}&select=id`,
+        {
+          method: 'GET',
+          headers: {
+            apikey: SUPABASE_SERVICE_ROLE_KEY,
+            Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`
+          }
+        }
+      );
+
+      const existsText = await existsRes.text();
+      let existsJson = [];
+      try { existsJson = existsText ? JSON.parse(existsText) : []; } catch (e) { existsJson = []; }
+
+      if (!existsRes.ok || !Array.isArray(existsJson) || existsJson.length === 0) {
+        console.warn('[syncJobToSupabase] assignments-only update rejected (job does not exist yet):', payload.id);
+        return {
+          statusCode: 400,
+          body: JSON.stringify({
+            success: false,
+            error: 'Assignments-only update rejected: job does not exist yet. Create/sync the job from Admin first.'
+          })
+        };
+      }
+    } catch (err) {
+      console.error('[syncJobToSupabase] assignments-only preflight check failed', err);
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ success: false, error: 'Preflight check failed' })
+      };
+    }
+  }
+
+console.log('[syncJobToSupabase] payload to Supabase:', {
     ...payload,
     id: payload.id ? '[uuid-present]' : '[omitted]'
   });
