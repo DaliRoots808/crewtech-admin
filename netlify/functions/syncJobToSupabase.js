@@ -158,6 +158,7 @@ if (job.updated_at !== undefined) payload.updated_at = job.updated_at;
     }
   }
 
+try {
 const res = await fetch(`${SUPABASE_URL}/rest/v1/jobs`, {
       method: 'POST',
       headers: {
