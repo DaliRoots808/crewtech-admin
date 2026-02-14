@@ -77,6 +77,7 @@ if (assignments !== undefined) {
     if (c === 'confirmed') return 'Confirmed';
     if (c === 'declined') return 'Declined';
     if (c === 'invited') return 'Invited';
+    if (c === 'cancelled' || c === 'canceled') return 'Cancelled';
     return v; // leave unknown statuses as-is
   };
 
