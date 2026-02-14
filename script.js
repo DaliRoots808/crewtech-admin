@@ -1144,9 +1144,6 @@ function renderJobGroups(container, jobs, data, options = {}) {
 
                 assignment.status = opt.value;
 
-// DEBUG: prove the click fired and what we set
-console.log('[Admin status pill] set', { jobId: job.id, workerId: assignment.workerId, status: assignment.status });
-
 // Immediate UI feedback (don’t rely on rerender to show active pill)
 try {
   pills.querySelectorAll('.status-pill').forEach((el) => el.classList.remove('active'));
@@ -1154,11 +1151,17 @@ try {
 } catch (e) {
   // ignore DOM issues; rerender will still fix it
 }
-// Keep assignedWorkerIds in sync safely (job.assignments may be null on Supabase-sourced jobs)
-job.assignments = Array.isArray(job.assignments) ? job.assignments : assignments;
-job.assignedWorkerIds = (job.assignments || []).map((a) => a.workerId);
+
+// CRITICAL: always persist/sync the exact assignments array we're editing
+job.assignments = assignments;
+job.assignedWorkerIds = (assignments || []).map((a) => a.workerId);
+
 saveData(data);
-                if (!["localhost","127.0.0.1"].includes(window.location.hostname)) syncJobToSupabaseClient(job);
+
+// Sync minimal payload so Supabase can’t accidentally overwrite other fields
+if (!["localhost","127.0.0.1"].includes(window.location.hostname)) {
+  syncJobToSupabaseClient({ id: job.id, assignments: job.assignments });
+}
 
                 if (window._crewtechRerenderAll) window._crewtechRerenderAll();
               });
