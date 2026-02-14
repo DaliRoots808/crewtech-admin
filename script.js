@@ -1949,7 +1949,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const res = await fetch('/.netlify/functions/syncJobToSupabase', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ job })
+        body: JSON.stringify({ job: { id: job.id, assignments: (job.assignments || job.worker_assignments || []) } })
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok || !json.success) {
