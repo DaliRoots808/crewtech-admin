@@ -20,6 +20,74 @@ function saveData(data) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
+/* ================= Sync Strip (Supabase truth + offline hedge) ================= */
+const __crewtechSync = {
+  online: typeof navigator !== 'undefined' ? navigator.onLine : true,
+  syncing: false,
+  pendingWrites: 0,
+  lastSyncAt: null
+};
+
+function fmtTimeShort(iso) {
+  try {
+    const d = iso ? new Date(iso) : null;
+    if (!d || isNaN(d.getTime())) return '';
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  } catch (_) { return ''; }
+}
+
+function setSyncStrip(state = {}) {
+  try {
+    Object.assign(__crewtechSync, state);
+    const el = document.getElementById('sync-strip');
+    if (!el) return;
+
+    const online = !!__crewtechSync.online;
+    const syncing = !!__crewtechSync.syncing;
+    const pending = Number(__crewtechSync.pendingWrites || 0);
+    const last = __crewtechSync.lastSyncAt ? fmtTimeShort(__crewtechSync.lastSyncAt) : '';
+
+    // Class + message (keep it minimal)
+    el.classList.remove('ok', 'warn', 'err');
+
+    if (!online) {
+      el.classList.add('warn');
+      el.textContent = pending > 0
+        ? `Offline — ${pending} pending`
+        : 'Offline — changes may not sync';
+      return;
+    }
+
+    if (syncing) {
+      el.classList.add('warn');
+      el.textContent = pending > 0
+        ? `Syncing… (${pending} pending)`
+        : 'Syncing…';
+      return;
+    }
+
+    // Online + idle
+    el.classList.add('ok');
+    if (pending > 0) {
+      el.textContent = `${pending} pending — will sync`;
+    } else if (last) {
+      el.textContent = `Live • last sync ${last}`;
+    } else {
+      el.textContent = 'Live';
+    }
+  } catch (_) {}
+}
+
+// Online/offline events
+try {
+  window.addEventListener('online', () => setSyncStrip({ online: true }));
+  window.addEventListener('offline', () => setSyncStrip({ online: false }));
+} catch (_) {}
+
+window.__crewtechSync = __crewtechSync;
+/* ================= /Sync Strip ================= */
+
+
 function generateId(prefix) {
   return prefix + '_' + Math.random().toString(36).slice(2, 9);
 }
@@ -1651,6 +1719,10 @@ function importBackupFromFile(file, data, rerenderAll) {
       data.jobs = jobs;
       saveData(data);
       rerenderAll();
+      try { if (window.__crewtechSync) window.__crewtechSync.pendingWrites = 0; } catch(e) {}
+      if (typeof setSyncStrip === 'function') setSyncStrip({ online: navigator.onLine, syncing: false, pendingWrites: 0, lastSyncAt: new Date().toISOString() });
+      try { if (window.__crewtechSync) window.__crewtechSync.pendingWrites = 0; } catch(e) {}
+      if (typeof setSyncStrip === 'function') setSyncStrip({ online: navigator.onLine, syncing: false, pendingWrites: 0, lastSyncAt: new Date().toISOString() });
 
       setBackupStatus(
         `Restored ${workerCount} worker${
@@ -2129,6 +2201,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function syncJobToSupabaseClient(job) {
     try {
+      // Sync strip: online/offline hedge
+      if (typeof setSyncStrip === 'function') setSyncStrip({ online: navigator.onLine, syncing: true });
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+        if (window.__crewtechSync) window.__crewtechSync.pendingWrites = (window.__crewtechSync.pendingWrites || 0) + 1;
+        if (typeof setSyncStrip === 'function') setSyncStrip({ online: false, syncing: false, pendingWrites: window.__crewtechSync ? window.__crewtechSync.pendingWrites : 1 });
+        return;
+      }
+
       console.log('[syncJobToSupabaseClient] sending job to Supabase', job);
       const res = await fetch('/.netlify/functions/syncJobToSupabase', {
         method: 'POST',
@@ -2155,17 +2235,29 @@ document.addEventListener('DOMContentLoaded', () => {
       const json = await res.json().catch(() => ({}));
       if (!res.ok || !json.success) {
         console.warn('[Supabase sync] job upsert failed', json);
+        if (typeof setSyncStrip === 'function') setSyncStrip({ online: navigator.onLine, syncing: false });
       } else {
         console.log('[Supabase sync] job upsert success', json.row || json);
+        try { if (window.__crewtechSync) window.__crewtechSync.pendingWrites = 0; } catch(e) {}
+        if (typeof setSyncStrip === 'function') setSyncStrip({ online: true, syncing: false, pendingWrites: 0, lastSyncAt: new Date().toISOString() });
       }
     } catch (err) {
       console.warn('[Supabase sync] job upsert error', err);
+      if (typeof setSyncStrip === 'function') setSyncStrip({ online: navigator.onLine, syncing: false });
     }
   }
 
   window.syncJobToSupabaseClient = syncJobToSupabaseClient;
 
   async function deleteJobFromSupabaseClient(jobId) {
+    // Sync strip: online/offline hedge
+    if (typeof setSyncStrip === 'function') setSyncStrip({ online: navigator.onLine, syncing: true });
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      if (window.__crewtechSync) window.__crewtechSync.pendingWrites = (window.__crewtechSync.pendingWrites || 0) + 1;
+      if (typeof setSyncStrip === 'function') setSyncStrip({ online: false, syncing: false, pendingWrites: window.__crewtechSync ? window.__crewtechSync.pendingWrites : 1 });
+      return false;
+    }
+
     try {
       const res = await fetch('/.netlify/functions/deleteJobFromSupabase', {
         method: 'POST',
@@ -2175,12 +2267,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const json = await res.json().catch(() => ({}));
       if (!res.ok || !json.success) {
         console.warn('[Supabase sync] job delete failed', json);
+      if (typeof setSyncStrip === 'function') setSyncStrip({ online: navigator.onLine, syncing: false });
         return false;
       }
       console.log('[Supabase sync] job delete success', json);
+      try { if (window.__crewtechSync) window.__crewtechSync.pendingWrites = 0; } catch(e) {}
+      if (typeof setSyncStrip === 'function') setSyncStrip({ online: true, syncing: false, pendingWrites: 0, lastSyncAt: new Date().toISOString() });
       return true;
     } catch (err) {
       console.warn('[Supabase sync] job delete error', err);
+      if (typeof setSyncStrip === 'function') setSyncStrip({ online: navigator.onLine, syncing: false });
       return false;
     }
   }
@@ -2190,10 +2286,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   async function refreshWorkersFromSupabase() {
+    if (typeof setSyncStrip === 'function') setSyncStrip({ online: navigator.onLine, syncing: true });
+
     try {
       const res = await fetch('/.netlify/functions/getWorkersFromSupabase');
       if (!res.ok) {
         console.warn('Supabase workers fetch failed with status', res.status);
+      if (typeof setSyncStrip === 'function') setSyncStrip({ online: navigator.onLine, syncing: false });
         return;
       }
 
@@ -2216,10 +2315,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function refreshJobsFromSupabase() {
+    if (typeof setSyncStrip === 'function') setSyncStrip({ online: navigator.onLine, syncing: true });
+
     try {
       const res = await fetch("/.netlify/functions/getJobsFromSupabase");
       if (!res.ok) {
         console.warn("Supabase jobs fetch failed with status", res.status);
+      if (typeof setSyncStrip === 'function') setSyncStrip({ online: navigator.onLine, syncing: false });
         return;
       }
 

@@ -1442,3 +1442,35 @@ button.small.danger {
   color: #333;
   background-color: #ffffff;
 }
+
+
+/* === Sync Strip (Supabase truth / offline) === */
+.sync-strip{
+  margin-top: 0.45rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  line-height: 1.2;
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.78);
+}
+
+.sync-strip.ok{
+  background: rgba(34,197,94,0.12);
+  border-color: rgba(34,197,94,0.22);
+  color: rgba(220,252,231,0.92);
+}
+
+.sync-strip.warn{
+  background: rgba(245,158,11,0.12);
+  border-color: rgba(245,158,11,0.22);
+  color: rgba(255,237,213,0.92);
+}
+
+.sync-strip.err{
+  background: rgba(239,68,68,0.12);
+  border-color: rgba(239,68,68,0.22);
+  color: rgba(254,226,226,0.92);
+}
