@@ -2198,12 +2198,10 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const payload = await res.json();
-      if (!payload || !Array.isArray(payload.workers) || !payload.workers.length) {
-        console.log('Supabase workers: no rows returned, keeping local workers.');
-        return;
-      }
+      const rows = (payload && Array.isArray(payload.workers)) ? payload.workers : [];
 
-      data.workers = payload.workers.map((w) => ({
+      // Supabase is the source of truth: if it returns 0 rows, we clear local.
+      data.workers = rows.map((w) => ({
         id: w.id,
         name: w.name || '',
         phone: w.phone || ''
@@ -2226,12 +2224,10 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const payload = await res.json();
-      if (!payload || !Array.isArray(payload.jobs) || !payload.jobs.length) {
-        console.log("Supabase jobs: no rows returned, keeping local jobs.");
-        return;
-      }
+      const rows = (payload && Array.isArray(payload.jobs)) ? payload.jobs : [];
 
-      data.jobs = payload.jobs.map((j) => ({
+      // Supabase is the source of truth: if it returns 0 rows, we clear local.
+      data.jobs = rows.map((j) => ({
         id: j.id,
         name: j.name || "",
         jobName: j.jobName ?? null,
