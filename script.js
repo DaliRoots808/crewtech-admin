@@ -1114,12 +1114,12 @@ function renderJobGroups(container, jobs, data, options = {}) {
 
           const nameSpanW = document.createElement('div');
           nameSpanW.className = 'worker-status-name';
-          nameSpanW.textContent = w.name;
+          nameSpanW.textContent = workerLabel;
           // Completed/Finalized: show a tiny history hint for Cancelled workers
           try {
             const st = String(assignment.status || '').trim().toLowerCase();
             if (options && options.showCancelledTextInWorkers && (st === 'cancelled' || st === 'canceled')) {
-              nameSpanW.textContent = (w.name || w.id) + ' (Cancelled)';
+              nameSpanW.textContent = workerLabel + ' (Cancelled)';
             }
           } catch (e) {}
           rowW.appendChild(nameSpanW);
