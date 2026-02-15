@@ -2311,8 +2311,10 @@ document.addEventListener('DOMContentLoaded', () => {
       saveData(data);
       rerenderAll();
       console.log(`Supabase workers loaded: ${data.workers.length}`);
+      if (typeof setSyncStrip === 'function') setSyncStrip({ online: true, syncing: false, pendingWrites: 0, lastSyncAt: new Date().toISOString() });
     } catch (err) {
       console.error('Error refreshing workers from Supabase:', err);
+      if (typeof setSyncStrip === 'function') setSyncStrip({ online: navigator.onLine, syncing: false });
     }
   }
 
@@ -2357,8 +2359,10 @@ document.addEventListener('DOMContentLoaded', () => {
       saveData(data);
       rerenderAll();
       console.log(`Supabase jobs loaded: ${data.jobs.length}`);
+      if (typeof setSyncStrip === 'function') setSyncStrip({ online: true, syncing: false, pendingWrites: 0, lastSyncAt: new Date().toISOString() });
     } catch (err) {
       console.error("Error refreshing jobs from Supabase:", err);
+      if (typeof setSyncStrip === "function") setSyncStrip({ online: navigator.onLine, syncing: false });
     }
   }
 
