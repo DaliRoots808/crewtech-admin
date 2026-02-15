@@ -1106,7 +1106,8 @@ function renderJobGroups(container, jobs, data, options = {}) {
         const showInviteBadges = !options.hideInviteBadges;
         assignments.forEach((assignment) => {
           const w = data.workers.find((ww) => ww.id === assignment.workerId);
-          if (!w) return;
+          // If worker record isn't present locally, still show something (id) instead of hiding history.
+          const workerLabel = w ? (w.name || w.id) : (assignment.workerId || '(unknown worker)');
 
           const rowW = document.createElement('div');
           rowW.className = 'worker-status-row';
@@ -1340,12 +1341,25 @@ if (!["localhost","127.0.0.1"].includes(window.location.hostname)) {
       deleteBtn.className = 'danger small';
       deleteBtn.textContent = 'Delete job';
 
-      deleteBtn.addEventListener('click', (e) => {
+      deleteBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
         if (!confirm('Delete this job/shift? This cannot be undone.')) return;
+
+        // Remove locally first (fast UI)
         data.jobs = data.jobs.filter((j) => j.id !== job.id);
         saveData(data);
         if (window._crewtechRerenderAll) window._crewtechRerenderAll();
+
+        // Best-effort delete in Supabase so it doesn't resurrect on refresh
+        try {
+          if (!['localhost','127.0.0.1'].includes(window.location.hostname)) {
+            if (window.deleteJobFromSupabaseClient) {
+              await window.deleteJobFromSupabaseClient(job.id);
+            } else {
+              console.warn('[Admin] deleteJobFromSupabaseClient missing on window');
+            }
+          }
+        } catch (err) {}
       });
 
       if (!(options && options.hideSmsQueueButton)) {
@@ -2150,6 +2164,30 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   window.syncJobToSupabaseClient = syncJobToSupabaseClient;
+
+  async function deleteJobFromSupabaseClient(jobId) {
+    try {
+      const res = await fetch('/.netlify/functions/deleteJobFromSupabase', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jobId })
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.success) {
+        console.warn('[Supabase sync] job delete failed', json);
+        return false;
+      }
+      console.log('[Supabase sync] job delete success', json);
+      return true;
+    } catch (err) {
+      console.warn('[Supabase sync] job delete error', err);
+      return false;
+    }
+  }
+
+  window.deleteJobFromSupabaseClient = deleteJobFromSupabaseClient;
+
+
 
   async function refreshWorkersFromSupabase() {
     try {
