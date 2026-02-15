@@ -1346,7 +1346,9 @@ if (!["localhost","127.0.0.1"].includes(window.location.hostname)) {
         data.jobs = data.jobs.filter((j) => j.id !== job.id);
         saveData(data);
         if (window._crewtechRerenderAll) window._crewtechRerenderAll();
-      });      if (!(options && options.hideSmsQueueButton)) {
+      });
+
+      if (!(options && options.hideSmsQueueButton)) {
 
 
       const smsQueueBtn = document.createElement('button');
