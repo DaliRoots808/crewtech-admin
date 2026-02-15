@@ -1179,6 +1179,134 @@ if (!["localhost","127.0.0.1"].includes(window.location.hostname)) {
         });
       }
 
+      
+
+      // ---- Add Worker (Upcoming Jobs) ----
+      try {
+        const addWrap = document.createElement('div');
+        addWrap.className = 'job-add-worker';
+
+        const addLabel = document.createElement('div');
+        addLabel.className = 'job-details-label';
+        addLabel.style.marginTop = '0.75rem';
+        addLabel.textContent = 'Add Worker';
+        addWrap.appendChild(addLabel);
+
+        const row = document.createElement('div');
+        row.style.display = 'flex';
+        row.style.gap = '0.5rem';
+        row.style.flexWrap = 'wrap';
+        row.style.alignItems = 'center';
+
+        const sel = document.createElement('select');
+        sel.className = 'small';
+        sel.style.minWidth = '220px';
+
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = 'Select worker…';
+        placeholder.disabled = true;
+        placeholder.selected = true;
+        sel.appendChild(placeholder);
+
+        function rebuildWorkerSelect() {
+          // clear all but placeholder
+          while (sel.options.length > 1) sel.remove(1);
+
+          const assignedIds = new Set((assignments || []).map(a => a.workerId));
+          (data.workers || [])
+            .filter(w => w && w.id && !assignedIds.has(w.id))
+            .forEach(w => {
+              const opt = document.createElement('option');
+              opt.value = w.id;
+              opt.textContent = w.name || w.id;
+              sel.appendChild(opt);
+            });
+        }
+
+        rebuildWorkerSelect();
+
+        const addBtn = document.createElement('button');
+        addBtn.className = 'secondary small';
+        addBtn.type = 'button';
+        addBtn.textContent = 'Add Worker';
+
+        addBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const workerId = sel.value;
+          if (!workerId) return;
+
+          const existing = (assignments || []).find(a => a.workerId === workerId);
+          if (!existing) {
+            assignments.push({ workerId, status: 'Invited' });
+          }
+
+          // persist + sync
+          job.assignments = assignments;
+          job.assignedWorkerIds = (assignments || []).map(a => a.workerId);
+          saveData(data);
+
+          if (!["localhost","127.0.0.1"].includes(window.location.hostname)) {
+            if (window.syncJobToSupabaseClient) {
+              window.syncJobToSupabaseClient({ id: job.id, assignments: job.assignments });
+            } else {
+              console.warn('[Admin] syncJobToSupabaseClient missing on window');
+            }
+          }
+
+          if (window._crewtechRerenderAll) window._crewtechRerenderAll();
+        });
+
+        const addNewBtn = document.createElement('button');
+        addNewBtn.className = 'small';
+        addNewBtn.type = 'button';
+        addNewBtn.textContent = 'Add New Worker';
+
+        addNewBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+
+          const name = prompt('New worker name:');
+          if (!name || !String(name).trim()) return;
+
+          const phone = prompt('Phone (optional):') || '';
+          const id = 'w_' + Math.random().toString(36).slice(2, 9);
+
+          data.workers = Array.isArray(data.workers) ? data.workers : [];
+          data.workers.push({ id, name: String(name).trim(), phone: String(phone).trim() });
+
+          assignments.push({ workerId: id, status: 'Invited' });
+
+          job.assignments = assignments;
+          job.assignedWorkerIds = (assignments || []).map(a => a.workerId);
+
+          saveData(data);
+
+          // best-effort: upsert new worker too, if helper exists
+          try {
+            if (!["localhost","127.0.0.1"].includes(window.location.hostname)) {
+              if (typeof upsertWorkerToSupabaseIfAvailable === 'function') {
+                upsertWorkerToSupabaseIfAvailable({ id, name: String(name).trim(), phone: String(phone).trim() });
+              }
+              if (window.syncJobToSupabaseClient) {
+                window.syncJobToSupabaseClient({ id: job.id, assignments: job.assignments });
+              }
+            }
+          } catch (err) {}
+
+          if (window._crewtechRerenderAll) window._crewtechRerenderAll();
+        });
+
+        row.appendChild(sel);
+        row.appendChild(addBtn);
+        row.appendChild(addNewBtn);
+
+        addWrap.appendChild(row);
+        workersBlock.appendChild(addWrap);
+      } catch (e) {
+        console.warn('[Admin] Add Worker UI failed to render', e);
+      }
+
+
       details.appendChild(workersBlock);
 
       // Actions row
