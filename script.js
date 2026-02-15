@@ -1213,9 +1213,16 @@ if (!["localhost","127.0.0.1"].includes(window.location.hostname)) {
           // clear all but placeholder
           while (sel.options.length > 1) sel.remove(1);
 
-          const assignedIds = new Set((assignments || []).map(a => a.workerId));
+          const activeAssignedIds = new Set(
+  (assignments || [])
+    .filter(a => {
+      const st = String((a && a.status) || 'Invited').trim().toLowerCase();
+      return st !== 'cancelled' && st !== 'canceled' && st !== 'declined';
+    })
+    .map(a => a.workerId)
+);
           (data.workers || [])
-            .filter(w => w && w.id && !assignedIds.has(w.id))
+            .filter(w => w && w.id && !activeAssignedIds.has(w.id))
             .forEach(w => {
               const opt = document.createElement('option');
               opt.value = w.id;
@@ -1239,6 +1246,11 @@ if (!["localhost","127.0.0.1"].includes(window.location.hostname)) {
           const existing = (assignments || []).find(a => a.workerId === workerId);
           if (!existing) {
             assignments.push({ workerId, status: 'Invited' });
+          } else {
+            const st = String(existing.status || 'Invited').trim().toLowerCase();
+            if (st === 'cancelled' || st === 'canceled' || st === 'declined') {
+              existing.status = 'Invited';
+            }
           }
 
           // persist + sync
