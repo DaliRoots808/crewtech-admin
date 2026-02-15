@@ -1114,6 +1114,13 @@ function renderJobGroups(container, jobs, data, options = {}) {
           const nameSpanW = document.createElement('div');
           nameSpanW.className = 'worker-status-name';
           nameSpanW.textContent = w.name;
+          // Completed/Finalized: show a tiny history hint for Cancelled workers
+          try {
+            const st = String(assignment.status || '').trim().toLowerCase();
+            if (options && options.showCancelledTextInWorkers && (st === 'cancelled' || st === 'canceled')) {
+              nameSpanW.textContent = (w.name || w.id) + ' (Cancelled)';
+            }
+          } catch (e) {}
           rowW.appendChild(nameSpanW);
 
           if (showInviteBadges) {
@@ -1182,6 +1189,8 @@ if (!["localhost","127.0.0.1"].includes(window.location.hostname)) {
       
 
       // ---- Add Worker (Upcoming Jobs) ----
+      // Hide Add Worker in Completed/Finalized views
+      if (!(options && options.hideAddWorker) && !job.reportCompleted) {
       try {
         const addWrap = document.createElement('div');
         addWrap.className = 'job-add-worker';
@@ -1319,6 +1328,8 @@ if (!["localhost","127.0.0.1"].includes(window.location.hostname)) {
       }
 
 
+      }
+
       details.appendChild(workersBlock);
 
       // Actions row
@@ -1335,7 +1346,8 @@ if (!["localhost","127.0.0.1"].includes(window.location.hostname)) {
         data.jobs = data.jobs.filter((j) => j.id !== job.id);
         saveData(data);
         if (window._crewtechRerenderAll) window._crewtechRerenderAll();
-      });
+      });      if (!(options && options.hideSmsQueueButton)) {
+
 
       const smsQueueBtn = document.createElement('button');
       smsQueueBtn.className = 'secondary small';
@@ -1347,6 +1359,7 @@ if (!["localhost","127.0.0.1"].includes(window.location.hostname)) {
       });
 
       actions.appendChild(smsQueueBtn);
+      }
       actions.appendChild(deleteBtn);
       details.appendChild(actions);
 
@@ -1468,7 +1481,11 @@ function renderCompletedJobs(data) {
     startCollapsed: true,
     hideInviteStatusSummary: true,
     hideInviteBadges: true,
-    useFinalizedNotes: true
+    useFinalizedNotes: true,
+    hideAddWorker: true,
+    hideSmsQueueButton: true,
+    showCancelledTextInWorkers: true,
+
   });
 }
 
