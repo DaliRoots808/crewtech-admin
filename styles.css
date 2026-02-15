@@ -1446,15 +1446,43 @@ button.small.danger {
 
 /* === Sync Strip (Supabase truth / offline) === */
 .sync-strip{
-  margin-top: 0.45rem;
-  padding: 0.35rem 0.6rem;
-  border-radius: 10px;
-  font-size: 0.85rem;
-  line-height: 1.2;
-  text-align: center;
-  border: 1px solid rgba(255,255,255,0.08);
+  margin-top: 0.35rem;
+  padding: 0.22rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  line-height: 1.1;
+  text-align: left;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+
+  border: 1px solid rgba(255,255,255,0.10);
   background: rgba(255,255,255,0.06);
-  color: rgba(255,255,255,0.78);
+  color: rgba(255,255,255,0.82);
+
+  max-width: 92vw;
+}
+
+.sync-strip .sync-ico{
+  width: 14px;
+  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 14px;
+}
+
+.sync-strip .sync-ico svg{
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
+.sync-strip .sync-text{
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sync-strip.ok{

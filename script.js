@@ -40,6 +40,8 @@ function setSyncStrip(state = {}) {
   try {
     Object.assign(__crewtechSync, state);
     const el = document.getElementById('sync-strip');
+    const ico = el ? el.querySelector('.sync-ico') : null;
+    const txt = el ? el.querySelector('.sync-text') : null;
     if (!el) return;
     // Ensure strip is visible (HTML has display:none by default)
     el.style.display = 'block';
@@ -49,14 +51,22 @@ function setSyncStrip(state = {}) {
     const pending = Number(__crewtechSync.pendingWrites || 0);
     const last = __crewtechSync.lastSyncAt ? fmtTimeShort(__crewtechSync.lastSyncAt) : '';
 
+
+    function _set(iconSvg, message) {
+      try {
+        if (ico) ico.innerHTML = iconSvg || '';
+        if (txt) txt.textContent = message || '';
+        else if (el) el.textContent = message || '';
+      } catch (_) {}
+    }
+
+
     // Class + message (keep it minimal)
     el.classList.remove('ok', 'warn', 'err');
 
     if (!online) {
       el.classList.add('warn');
-      el.textContent = pending > 0
-        ? `Offline — ${pending} pending`
-        : 'Offline — changes may not sync';
+      _set("<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M2 2l20 20'/><path d='M16.7 16.7A7 7 0 0 1 5 12'/><path d='M7.3 7.3A7 7 0 0 1 19 12c0 1.2-.3 2.4-.9 3.4'/></svg>", pending > 0 ? `Offline — ${pending} pending` : 'Offline — changes may not sync');
       return;
     }
 
@@ -70,12 +80,13 @@ function setSyncStrip(state = {}) {
 
     // Online + idle
     el.classList.add('ok');
+    _set("<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='9'/><path d='M8 12.5l2.5 2.5L16 9.5'/></svg>", '');
     if (pending > 0) {
-      el.textContent = `${pending} pending — will sync`;
+      txt ? (txt.textContent = `${pending} pending — will sync`) : (el.textContent = `${pending} pending — will sync`);
     } else if (last) {
-      el.textContent = `Live • last sync ${last}`;
+      txt ? (txt.textContent = `Live • last sync ${last}`) : (el.textContent = `Live • last sync ${last}`);
     } else {
-      el.textContent = 'Live';
+      txt ? (txt.textContent = 'Live') : (el.textContent = 'Live');
     }
   } catch (_) {}
 }
