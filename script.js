@@ -41,6 +41,8 @@ function setSyncStrip(state = {}) {
     Object.assign(__crewtechSync, state);
     const el = document.getElementById('sync-strip');
     if (!el) return;
+    // Ensure strip is visible (HTML has display:none by default)
+    el.style.display = 'block';
 
     const online = !!__crewtechSync.online;
     const syncing = !!__crewtechSync.syncing;
