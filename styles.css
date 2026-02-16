@@ -135,7 +135,7 @@ h2[role="button"] {
 }
 
 .shift-pill {
-  border-radius: 999px;
+  border-radius: 0;
   border: 1px solid #e5e7eb;
   padding: 0.15rem 0.7rem;
   background: #f9fafb;
@@ -419,7 +419,7 @@ button.danger:hover {
   text-transform: none;
   letter-spacing: 0;
   padding: 0.15rem 0.6rem;
-  border-radius: 999px;
+  border-radius: 0;
   border: 1px solid #e5e7eb;
   background: #f9fafb;
 }
@@ -501,7 +501,7 @@ button.danger:hover {
 
 .phase-tag {
   padding: 0.05rem 0.45rem;
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -616,7 +616,7 @@ button.danger:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 999px;
+  border-radius: 0;
   padding: 0.15rem 0.6rem;
   font-size: 0.75rem;
   border: 1px solid #e5e7eb;
@@ -1007,7 +1007,7 @@ button.danger:hover {
 
 /* Small “Update phone number” link-style button */
 .sms-phone-edit-link {
-  border-radius: 999px;
+  border-radius: 0;
   padding: 0.25rem 0.9rem;
   font-size: 0.8rem;
   font-weight: 500;
@@ -1068,7 +1068,7 @@ button.danger:hover {
   width: 100%;
   height: 100%;
   background: rgba(255, 255, 255, 0.25);
-  border-radius: 999px;
+  border-radius: 0;
   transition: background 0.18s ease;
 }
 
@@ -1080,7 +1080,7 @@ button.danger:hover {
   top: 2px;
   width: 16px;
   height: 16px;
-  border-radius: 999px;
+  border-radius: 0;
   background: #ffffff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
   transition: transform 0.18s ease;
@@ -1104,7 +1104,7 @@ button.danger:hover {
 /* Style the small Update button to look subtle on orange header */
 .sms-pref-row button {
   background: transparent;
-  border-radius: 999px;
+  border-radius: 0;
   border: 1px solid rgba(255, 255, 255, 0.55);
   color: #ffe7cf;
   padding: 0.15rem 0.7rem;
@@ -1353,7 +1353,7 @@ button.small.danger {
   max-width: 90%;
   padding: 0.4rem 0.85rem;
   font-size: 0.82rem;
-  border-radius: 999px;
+  border-radius: 0;
   background: rgba(15, 23, 42, 0.94); /* dark slate */
   color: #f9fafb;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
@@ -1398,7 +1398,7 @@ button.small.danger {
   max-width: 240px;
   width: 100%;
   padding: 0.55rem 1rem;
-  border-radius: 999px;
+  border-radius: 0;
   border: 2px solid rgba(255, 255, 255, 0.75);
   background: rgba(255, 255, 255, 0.12);
   color: #fff;
@@ -1414,7 +1414,7 @@ button.small.danger {
 /* Small “Save” pill button */
 .worker-phone-save-btn {
   padding: 0.4rem 0.9rem;
-  border-radius: 999px;
+  border-radius: 0;
   border: 2px solid rgba(255, 255, 255, 0.75);
   background: rgba(255, 255, 255, 0.16);
   color: #fff;
@@ -1498,7 +1498,7 @@ button.small.danger {
 .sync-strip{
   margin-top: 0.35rem;
   padding: 0.22rem 0.45rem;
-  border-radius: 999px;
+  border-radius: 0;
   font-size: 0.72rem;
   line-height: 1.1;
   text-align: left;
@@ -1507,8 +1507,8 @@ button.small.danger {
   align-items: center;
   gap: 0.35rem;
 
-  border: 1px solid rgba(255,255,255,0.10);
-  background: rgba(255,255,255,0.06);
+  border: none;
+  background: transparent;
   color: rgba(255,255,255,0.82);
 
   max-width: 92vw;
