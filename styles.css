@@ -1447,7 +1447,7 @@ button.small.danger {
 /* === Sync Strip (Supabase truth / offline) === */
 .sync-strip{
   position: fixed;
-  top: 8px;
+  top: 0px;
   left: 10px;
   z-index: 9999;
 
