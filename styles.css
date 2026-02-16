@@ -1600,3 +1600,30 @@ button.small.danger {
     padding: 0 !important;
   }
 }
+
+/* === Finalize Job: REAL spacing fix === */
+#finalize-section .worker-row,
+#finalize-section .worker-hours-row{
+  padding: 6px 0 !important;
+  margin: 0 !important;
+}
+
+/* compress worker name spacing */
+#finalize-section .worker-name{
+  margin-bottom: 4px !important;
+}
+
+/* compact the pill inputs */
+#finalize-section input[type="time"],
+#finalize-section input[type="number"]{
+  height: 26px !important;
+  padding: 2px 8px !important;
+  font-size: 0.88rem !important;
+  border-radius: 14px !important;
+}
+
+/* tighten horizontal gaps */
+#finalize-section .hours-input-group{
+  gap: 6px !important;
+}
+
