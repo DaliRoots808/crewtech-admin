@@ -1523,3 +1523,7 @@ button.small.danger {
 .sync-strip.warn{ color: rgba(255,255,255,0.92); opacity: 0.92; }
 
 .sync-strip.err{ color: rgba(255,255,255,0.92); opacity: 0.92; }
+
+/* Sync HUD fade */
+.sync-strip{transition:opacity .4s ease;}
+.sync-strip.idle{opacity:.45;}
