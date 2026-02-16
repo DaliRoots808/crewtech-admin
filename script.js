@@ -28,6 +28,8 @@ const __crewtechSync = {
   lastSyncAt: null
 };
 
+let __syncIdleTimer = null;
+
 function fmtTimeShort(iso) {
   try {
     const d = iso ? new Date(iso) : null;
@@ -63,6 +65,8 @@ function setSyncStrip(state = {}) {
 
     // Class + message (keep it minimal)
     el.classList.remove('ok', 'warn', 'err');
+    try { el.classList.remove('idle'); } catch (_) {}
+    try { if (__syncIdleTimer) clearTimeout(__syncIdleTimer); } catch (_) {}
 
     if (!online) {
       el.classList.add('warn');
@@ -83,14 +87,29 @@ function setSyncStrip(state = {}) {
     el.classList.add('ok');
     _set("<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='9'/><path d='M8 12.5l2.5 2.5L16 9.5'/></svg>", '');
     if (pending > 0) {
-      txt ? (txt.textContent = `${pending} pending — will sync`) : (el.textContent = `${pending} pending — will sync`);
+      txt ? (txt.textContent = `${pending} pending`) : (el.textContent = `${pending} pending`);
     } else if (last) {
-      txt ? (txt.textContent = `Live • last sync ${last}`) : (el.textContent = `Live • last sync ${last}`);
+      txt ? (txt.textContent = `Live ${last}`) : (el.textContent = `Live ${last}`);
     } else {
       txt ? (txt.textContent = 'Live') : (el.textContent = 'Live');
     }
+
+    _armIdle();
   } catch (_) {}
 }
+
+
+    function _armIdle() {
+      try { if (__syncIdleTimer) clearTimeout(__syncIdleTimer); } catch (_) {}
+      try {
+        __syncIdleTimer = setTimeout(() => {
+          try {
+            const el2 = document.getElementById('sync-strip');
+            if (el2) el2.classList.add('idle');
+          } catch (_) {}
+        }, 10000);
+      } catch (_) {}
+    }
 
 // Online/offline events
 try {
