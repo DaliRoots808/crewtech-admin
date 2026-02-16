@@ -1627,3 +1627,24 @@ button.small.danger {
   gap: 6px !important;
 }
 
+/* TEST MARKER FINALIZE SPACING */
+
+/* === Finalize Job: TRUE table compression === */
+#finalize-section .table{
+  margin-top: 0.25rem !important;
+  font-size: 0.8rem !important;
+}
+
+#finalize-section .table th,
+#finalize-section .table td{
+  padding: 0.25rem 0.25rem !important;
+  vertical-align: middle !important;
+}
+
+#finalize-section .table input{
+  height: 26px !important;
+  padding: 2px 8px !important;
+  font-size: 0.85rem !important;
+  border-radius: 12px !important;
+}
+
