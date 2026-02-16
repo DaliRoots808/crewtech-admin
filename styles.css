@@ -1552,3 +1552,33 @@ button.small.danger {
 .tagline{
   margin-top: 4px !important;
 }
+
+/* === Finalize Job: compact hours table (Option #1) === */
+#finalize-section table{
+  border-collapse: collapse;
+}
+
+#finalize-section th{
+  padding: 6px 6px !important;
+  font-size: 0.72rem !important;
+  letter-spacing: 0.06em !important;
+}
+
+#finalize-section td{
+  padding: 6px 6px !important;
+  vertical-align: middle;
+}
+
+#finalize-section input[type="time"],
+#finalize-section input[type="text"],
+#finalize-section input[type="number"]{
+  height: 30px !important;
+  padding: 4px 10px !important;
+  border-radius: 999px !important;
+  font-size: 0.92rem !important;
+}
+
+#finalize-section .muted{
+  margin-top: 4px !important;
+}
+
