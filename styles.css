@@ -1687,3 +1687,19 @@ button.small.danger {
   }
 }
 
+
+/* === Finalize Job: micro-polish on mobile (keep layout, reduce pill crowding) === */
+@media (max-width: 520px){
+  #finalize-section .table th,
+  #finalize-section .table td{
+    padding: 0.35rem 0.22rem !important;
+  }
+
+  #finalize-section .table input.finalize-input{
+    height: 24px !important;
+    padding: 2px 7px !important;
+    font-size: 0.82rem !important;
+    border-radius: 12px !important;
+  }
+}
+
