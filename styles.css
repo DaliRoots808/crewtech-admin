@@ -1495,24 +1495,6 @@ button.small.danger {
 .sync-strip.warn{ color: rgba(255,237,213,0.92); }
 .sync-strip.err{ color: rgba(254,226,226,0.92); }
 
-.sync-strip{
-  margin-top: 0.35rem;
-  padding: 0.22rem 0.45rem;
-  border-radius: 0;
-  font-size: 0.72rem;
-  line-height: 1.1;
-  text-align: left;
-
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-
-  border: none;
-  background: transparent;
-  color: rgba(255,255,255,0.82);
-
-  max-width: 92vw;
-}
 
 .sync-strip .sync-ico{
   width: 14px;
