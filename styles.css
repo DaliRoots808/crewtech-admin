@@ -1448,7 +1448,7 @@ button.small.danger {
 .sync-strip{
   position: fixed;
   top: 0px;
-  left: 10px;
+  
   z-index: 9999;
 
   display: inline-flex;
