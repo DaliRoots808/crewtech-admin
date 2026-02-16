@@ -1,7 +1,0 @@
-[build]
-  functions = "netlify/functions"
-  publish = "."
-
-# Explicitly tell Netlify this is just a static site, no framework dev server to proxy.
-[dev]
-  framework = "#static"
