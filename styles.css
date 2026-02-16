@@ -1703,3 +1703,11 @@ button.small.danger {
   }
 }
 
+
+/* === Production: Hide Dev / Sandbox Tools === */
+#dev-sandbox-section,
+#sandbox-section,
+#dev-tools-section {
+  display: none !important;
+}
+
