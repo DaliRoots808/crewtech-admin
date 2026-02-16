@@ -1589,3 +1589,14 @@ button.small.danger {
   header{ margin-bottom: 0.25rem !important; }
   #sync-strip.sync-strip{ margin: 4px auto 0 !important; }
 }
+
+/* === Mobile header tighten (logo + header internals) === */
+@media (max-width: 900px){
+  .logo{ height: 54px !important; }                 /* was 64px */
+  .header-logo-only{ margin-top: 2px !important; }  /* pull logo up */
+  .tagline{ margin-top: 2px !important; }           /* pull tagline up */
+  #sync-strip.sync-strip{
+    margin: 2px auto 0 !important;                  /* pull sync up */
+    padding: 0 !important;
+  }
+}
