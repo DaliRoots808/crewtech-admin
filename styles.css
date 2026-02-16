@@ -1582,3 +1582,10 @@ button.small.danger {
   margin-top: 4px !important;
 }
 
+
+/* === Tighten top spacing on MOBILE (override media-query rules) === */
+@media (max-width: 900px){
+  .page{ padding-top: 0.35rem !important; }
+  header{ margin-bottom: 0.25rem !important; }
+  #sync-strip.sync-strip{ margin: 4px auto 0 !important; }
+}
