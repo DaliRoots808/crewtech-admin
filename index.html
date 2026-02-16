@@ -8,7 +8,8 @@
   <script src="./script.js" defer></script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22black%22/><text x=%2250%22 y=%2265%22 font-size=%2260%22 text-anchor=%22middle%22 fill=%22white%22 font-family=%22Arial%22>C</text></svg>">
 </head>
-<body>
+<body data-host="">
+<script>(function(){try{var h=location.hostname||"";if(h==="localhost"||h==="127.0.0.1"){document.body.setAttribute("data-host","local");}else{document.body.setAttribute("data-host","prod");}}catch(e){}})();</script>
   <div id="sync-strip" class="sync-strip" style="display:none;"><span class="sync-ico" aria-hidden="true"></span><span class="sync-text"></span></div>
 
   <!-- Splash / loading screen -->
@@ -399,7 +400,7 @@
     </section>
 
     <!-- Dev / Sandbox tools (local only) -->
-    <section class="section" id="dev-tools-section">
+    <section class="section" id="dev-tools-section" data-local-only="1">
       <h2 style="display:flex; align-items:center; gap:0.4rem; font-size:1rem;">
         <span>Dev / Sandbox tools</span>
         <span class="muted" style="font-size:0.75rem;">(local only)</span>
@@ -427,7 +428,7 @@
     </section>
 
     <!-- Safety & Backup footer -->
-    <div style="margin-top:1.5rem; padding:0.75rem 0 1.5rem; border-top:1px dashed rgba(255, 237, 213, 0.7); text-align:center;">
+    <div id="backup-footer" data-local-only="1" style="margin-top:1.5rem; padding:0.75rem 0 1.5rem; border-top:1px dashed rgba(255, 237, 213, 0.7); text-align:center;">
       <p style="margin:0 0 0.35rem; font-size:0.8rem; letter-spacing:0.12em; text-transform:uppercase; color:#ffedd5;">
         Safety &amp; Backup
       </p>

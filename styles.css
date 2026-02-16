@@ -1711,3 +1711,10 @@ button.small.danger {
   display: none !important;
 }
 
+
+/* === Local-only UI blocks (hide on production) === */
+[data-local-only="1"]{ display:none; }
+@media (min-width: 0px){
+  body[data-host="local"] [data-local-only="1"]{ display:block; }
+  body[data-host="local"] #backup-footer[data-local-only="1"]{ display:block; }
+}
