@@ -38,11 +38,11 @@ body {
 .page {
   max-width: 840px;
   margin: 0 auto;
-  padding: 1.4rem 1rem 2.6rem;
+  padding: 0.75rem 1rem 2.6rem;
 }
 
 header {
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.45rem;
 }
 
 header h1 {
@@ -946,7 +946,7 @@ button.danger:hover {
 }
 
 #all-jobs-section {
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.45rem;
 }
 
 /* ==================================================================== */
@@ -979,7 +979,7 @@ button.danger:hover {
   align-items: center;
   gap: 0.4rem;
   margin-top: -0.1rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.45rem;
   width: 100%;
 }
 
@@ -1292,7 +1292,7 @@ button.small.danger {
 #schedule-overview-section .see-all-wrapper {
   display: flex;
   justify-content: center;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.45rem;
 }
 
 /* Fix See All Jobs button alignment inside Upcoming Jobs */
