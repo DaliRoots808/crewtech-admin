@@ -1527,3 +1527,10 @@ button.small.danger {
 /* Sync HUD fade */
 .sync-strip{transition:opacity .4s ease;}
 .sync-strip.idle{opacity:.45;}
+
+/* Sync HUD typography refinement */
+.sync-strip{
+  font-weight: 500;
+  letter-spacing: 0;
+  font-size: 11.5px;
+}
