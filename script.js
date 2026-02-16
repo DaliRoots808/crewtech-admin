@@ -2150,7 +2150,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('[Seed] Demo workers/jobs created for testing.');
   }
 
-  if (seedTestDataBtn) {
+  if (["localhost","127.0.0.1"].includes(window.location.hostname) && seedTestDataBtn) {
     seedTestDataBtn.addEventListener('click', handleSeedTestDataClick);
   }
 
@@ -2635,13 +2635,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ---- Backup buttons ---- */
-  if (backupDownloadLink) {
+  if (["localhost","127.0.0.1"].includes(window.location.hostname) && backupDownloadLink) {
     backupDownloadLink.addEventListener('click', () =>
       exportBackupJson(data)
     );
   }
 
-  if (backupRestoreLink && backupFileInput) {
+  if (["localhost","127.0.0.1"].includes(window.location.hostname) && backupRestoreLink && backupFileInput) {
     backupRestoreLink.addEventListener('click', () => {
       backupFileInput.value = '';
       backupFileInput.click();
@@ -2673,7 +2673,7 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ---- Reset app data (dev only) ---- */
   // Dev-only: clears local data AND Supabase jobs/workers via clearAllData function.
   // Do not expose this in worker.html.
-  if (resetAppDataBtn) {
+  if (["localhost","127.0.0.1"].includes(window.location.hostname) && resetAppDataBtn) {
     resetAppDataBtn.addEventListener('click', async () => {
       const confirmed = confirm('This will delete ALL jobs and ALL workers. Continue?');
       if (!confirmed) return;
@@ -3184,13 +3184,13 @@ Notes: Evan (client) prefers text update 30 min before arrival.`
   }
 
   /* ---- Generate sample jobs (dev) ---- */
-  if (generateSampleJobsBtn) {
+  if (["localhost","127.0.0.1"].includes(window.location.hostname) && generateSampleJobsBtn) {
     generateSampleJobsBtn.addEventListener('click', () => {
       generateSampleJobs(20);
     });
   }
 
-  if (generateFinalizableJobsBtn) {
+  if (["localhost","127.0.0.1"].includes(window.location.hostname) && generateFinalizableJobsBtn) {
     generateFinalizableJobsBtn.addEventListener('click', () => {
       generateFinalizableJobs();
     });
