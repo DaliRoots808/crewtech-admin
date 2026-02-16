@@ -1534,3 +1534,21 @@ button.small.danger {
   letter-spacing: 0;
   font-size: 11.5px;
 }
+
+/* === Sync banner spacing tighten (override) === */
+#sync-strip.sync-strip{
+  margin: 6px auto 0 !important;   /* less space above/below */
+  padding: 0 !important;           /* keep it featherweight */
+  line-height: 1 !important;
+}
+
+/* pull header/logo up closer (override) */
+.page header{
+  padding-top: 6px !important;
+}
+.header-logo-only{
+  margin-top: 6px !important;
+}
+.tagline{
+  margin-top: 4px !important;
+}
