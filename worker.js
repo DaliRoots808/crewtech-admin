@@ -180,34 +180,6 @@ function removeSplash() {
   }, 800);
 }
 
-async function fetchWorkerFromSupabase(workerId) {
-  try {
-    const res = await fetch(
-      '/.netlify/functions/getWorkersFromSupabase?workerId=' +
-        encodeURIComponent(workerId)
-    );
-    const json = await res.json().catch(() => null);
-    if (!res.ok || !json || !Array.isArray(json) || json.length === 0) {
-      return;
-    }
-    const row = json[0];
-
-    if (row.sms_opt_in === true || row.sms_opt_in === false) {
-      const data = loadData();
-      const local = (data.workers || []).find((w) => w.id === workerId);
-      if (local) {
-        local.sms_opt_in = row.sms_opt_in ? 'on' : 'off';
-        saveData(data);
-        if (currentWorkerForSms && currentWorkerForSms.id === workerId) {
-          currentWorkerForSms.sms_opt_in = row.sms_opt_in ? 'on' : 'off';
-          updateSmsPreferenceRow(currentWorkerForSms);
-        }
-      }
-    }
-  } catch (err) {
-    console.warn('[fetchWorkerFromSupabase] error', err);
-  }
-}
 
 async function fetchWorkerFromSupabaseById(workerId) {
   if (!workerId) return null;
@@ -396,34 +368,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     removeSplash();
     return;
   }
-
   let worker = (data.workers || []).find((w) => w.id === workerId);
 
-  // If worker not found locally but we have a workerId, try Supabase.
-  if (!worker && workerId) {
-    const supaWorker = await fetchWorkerFromSupabaseById(workerId);
-    if (supaWorker) {
-      worker = supaWorker;
-
-      // Cache into local data so this browser recognizes the link next time.
-      if (!Array.isArray(data.workers)) {
-        data.workers = [];
-      }
-      const existingIndex = data.workers.findIndex((w) => w.id === workerId);
-      if (existingIndex >= 0) {
-        data.workers[existingIndex] = supaWorker;
-      } else {
-        data.workers.push(supaWorker);
-      }
-      if (typeof saveData === "function") {
-        try {
-          saveData(data);
-        } catch (e) {
-          console.warn("[Worker Portal] Failed to save Supabase worker locally", e);
-        }
-      }
+  // Try Supabase ONCE (prod only). If found, cache locally for next time.
+  let supaWorker = null;
+  if (!["localhost","127.0.0.1"].includes(window.location.hostname) && (typeof navigator === "undefined" || navigator.onLine !== false)) {
+    supaWorker = await fetchWorkerFromSupabaseById(workerId);
+  }
+  if (supaWorker) {
+    worker = supaWorker;
+    if (!Array.isArray(data.workers)) data.workers = [];
+    const existingIndex = data.workers.findIndex((w) => w.id === workerId);
+    if (existingIndex >= 0) data.workers[existingIndex] = supaWorker;
+    else data.workers.push(supaWorker);
+    if (typeof saveData === "function") {
+      try { saveData(data); } catch (e) { console.warn("[Worker Portal] Failed to save Supabase worker locally", e); }
     }
   }
+
   if (!worker) {
     meta.textContent =
       'This worker link is not recognized on this device yet.';
@@ -440,21 +402,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   currentWorkerForSms = worker;
   saveWorker(currentWorkerForSms);
-
-  await fetchWorkerFromSupabase(workerId);
-  if (currentWorkerForSms?.sms_opt_in === undefined) {
-    currentWorkerForSms.sms_opt_in = null;
-    saveWorker(currentWorkerForSms);
-  }
-  if (
-    currentWorkerForSms &&
-    (currentWorkerForSms.sms_opt_in === 'on' ||
-      currentWorkerForSms.sms_opt_in === 'off' ||
-      currentWorkerForSms.sms_opt_in === true ||
-      currentWorkerForSms.sms_opt_in === false)
-  ) {
-    updateSmsPreferenceRow(currentWorkerForSms);
-  }
+  updateSmsPreferenceRow(currentWorkerForSms);
 
   if (currentWorkerForSms && currentWorkerForSms.sms_opt_in === null) {
     showSmsConsentModal();
