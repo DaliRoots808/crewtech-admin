@@ -2315,84 +2315,62 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   window.deleteJobFromSupabaseClient = deleteJobFromSupabaseClient;
-
-
-
-  async function refreshWorkersFromSupabase() {
-    if (typeof setSyncStrip === 'function') setSyncStrip({ online: navigator.onLine, syncing: true });
+  // Boot-time: fetch workers + jobs in parallel, then save + rerender once.
+  async function refreshAllFromSupabase() {
+    if (typeof navigator !== "undefined" && navigator.onLine === false) return;
+    if (typeof setSyncStrip === "function") setSyncStrip({ online: navigator.onLine, syncing: true });
 
     try {
-      const res = await fetch('/.netlify/functions/getWorkersFromSupabase');
-      if (!res.ok) {
-        console.warn('Supabase workers fetch failed with status', res.status);
-      if (typeof setSyncStrip === 'function') setSyncStrip({ online: navigator.onLine, syncing: false });
-        return;
+      const [wRes, jRes] = await Promise.all([
+        fetch("/.netlify/functions/getWorkersFromSupabase"),
+        fetch("/.netlify/functions/getJobsFromSupabase")
+      ]);
+
+      if (wRes.ok) {
+        const wPayload = await wRes.json().catch(() => ({}));
+        const rows = (wPayload && Array.isArray(wPayload.workers)) ? wPayload.workers : [];
+        data.workers = rows.map((w) => ({ id: w.id, name: w.name || "", phone: w.phone || "" }));
+      } else {
+        console.warn("Supabase workers fetch failed with status", wRes.status);
       }
 
-      const payload = await res.json();
-      const rows = (payload && Array.isArray(payload.workers)) ? payload.workers : [];
-
-      // Supabase is the source of truth: if it returns 0 rows, we clear local.
-      data.workers = rows.map((w) => ({
-        id: w.id,
-        name: w.name || '',
-        phone: w.phone || ''
-      }));
+      if (jRes.ok) {
+        const jPayload = await jRes.json().catch(() => ({}));
+        const rows = (jPayload && Array.isArray(jPayload.jobs)) ? jPayload.jobs : [];
+        data.jobs = rows.map((j) => ({
+          id: j.id,
+          name: j.name || "",
+          jobName: j.jobName ?? null,
+          jobNameMinimal: j.jobNameMinimal ?? null,
+          date: j.date || "",
+          startTime: j.startTime || "",
+          endTime: j.endTime || "",
+          booth: j.booth || "",
+          boothNumber: j.boothNumber ?? null,
+          location: j.location || "",
+          phase: j.phase || "",
+          jobPhase: j.jobPhase ?? null,
+          notes: j.notes || "",
+          rawText: j.rawText || "",
+          assignments: j.assignments ?? null,
+          finalizedWorkLog: j.finalizedWorkLog ?? null,
+          finalizedNotes: j.finalizedNotes ?? null,
+          reportCompleted: j.reportCompleted ?? false,
+          createdAt: j.createdAt ?? null,
+          updatedAt: j.updatedAt ?? null
+        }));
+      } else {
+        console.warn("Supabase jobs fetch failed with status", jRes.status);
+      }
 
       saveData(data);
       rerenderAll();
-      console.log(`Supabase workers loaded: ${data.workers.length}`);
-      if (typeof setSyncStrip === 'function') setSyncStrip({ online: true, syncing: false, pendingWrites: 0, lastSyncAt: new Date().toISOString() });
-    } catch (err) {
-      console.error('Error refreshing workers from Supabase:', err);
-      if (typeof setSyncStrip === 'function') setSyncStrip({ online: navigator.onLine, syncing: false });
-    }
-  }
 
-  async function refreshJobsFromSupabase() {
-    if (typeof setSyncStrip === 'function') setSyncStrip({ online: navigator.onLine, syncing: true });
-
-    try {
-      const res = await fetch("/.netlify/functions/getJobsFromSupabase");
-      if (!res.ok) {
-        console.warn("Supabase jobs fetch failed with status", res.status);
-      if (typeof setSyncStrip === 'function') setSyncStrip({ online: navigator.onLine, syncing: false });
-        return;
+      if (typeof setSyncStrip === "function") {
+        setSyncStrip({ online: true, syncing: false, pendingWrites: 0, lastSyncAt: new Date().toISOString() });
       }
-
-      const payload = await res.json();
-      const rows = (payload && Array.isArray(payload.jobs)) ? payload.jobs : [];
-
-      // Supabase is the source of truth: if it returns 0 rows, we clear local.
-      data.jobs = rows.map((j) => ({
-        id: j.id,
-        name: j.name || "",
-        jobName: j.jobName ?? null,
-        jobNameMinimal: j.jobNameMinimal ?? null,
-        date: j.date || "",
-        startTime: j.startTime || "",
-        endTime: j.endTime || "",
-        booth: j.booth || "",
-        boothNumber: j.boothNumber ?? null,
-        location: j.location || "",
-        phase: j.phase || "",
-        jobPhase: j.jobPhase ?? null,
-        notes: j.notes || "",
-        rawText: j.rawText || "",
-        assignments: j.assignments ?? null,
-        finalizedWorkLog: j.finalizedWorkLog ?? null,
-        finalizedNotes: j.finalizedNotes ?? null,
-        reportCompleted: j.reportCompleted ?? false,
-        createdAt: j.createdAt ?? null,
-        updatedAt: j.updatedAt ?? null
-      }));
-
-      saveData(data);
-      rerenderAll();
-      console.log(`Supabase jobs loaded: ${data.jobs.length}`);
-      if (typeof setSyncStrip === 'function') setSyncStrip({ online: true, syncing: false, pendingWrites: 0, lastSyncAt: new Date().toISOString() });
     } catch (err) {
-      console.error("Error refreshing jobs from Supabase:", err);
+      console.error("Error refreshing all data from Supabase:", err);
       if (typeof setSyncStrip === "function") setSyncStrip({ online: navigator.onLine, syncing: false });
     }
   }
@@ -3578,11 +3556,8 @@ Notes: Evan (client) prefers text update 30 min before arrival.`
       }
     }
   }
-
   window._crewtechRerenderAll = rerenderAll;
-  rerenderAll();
-  refreshWorkersFromSupabase();
-  refreshJobsFromSupabase();
+  refreshAllFromSupabase();
 
   /* ---- Splash screen ---- */
   const splash = document.getElementById('splash-overlay');
