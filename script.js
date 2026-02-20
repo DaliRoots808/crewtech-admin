@@ -922,6 +922,17 @@ function renderWorkersTable(data) {
       });
       saveData(data);
       if (window._crewtechRerenderAll) window._crewtechRerenderAll();
+
+      // Best-effort delete in Supabase so it doesn't resurrect on refresh
+      try {
+        if (!['localhost','127.0.0.1'].includes(window.location.hostname)) {
+          if (window.deleteWorkerFromSupabaseClient) {
+            window.deleteWorkerFromSupabaseClient(w.id);
+          } else {
+            console.warn('[Admin] deleteWorkerFromSupabaseClient missing on window');
+          }
+        }
+      } catch (err) {}
     });
 
     actionsTd.appendChild(delBtn);
@@ -2315,6 +2326,49 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   window.deleteJobFromSupabaseClient = deleteJobFromSupabaseClient;
+
+  async function deleteWorkerFromSupabaseClient(workerId) {
+    // Sync strip: online/offline hedge
+    if (typeof setSyncStrip === 'function') setSyncStrip({ online: navigator.onLine, syncing: true });
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      if (window.__crewtechSync) window.__crewtechSync.pendingWrites = (window.__crewtechSync.pendingWrites || 0) + 1;
+      if (typeof setSyncStrip === 'function')
+        setSyncStrip({
+          online: false,
+          syncing: false,
+          pendingWrites: window.__crewtechSync ? window.__crewtechSync.pendingWrites : 1
+        });
+      return false;
+    }
+
+    try {
+      const res = await fetch('/.netlify/functions/deleteWorkerFromSupabase', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ workerId })
+      });
+
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.success) {
+        console.warn('[Supabase sync] worker delete failed', json);
+        if (typeof setSyncStrip === 'function') setSyncStrip({ online: navigator.onLine, syncing: false });
+        return false;
+      }
+
+      console.log('[Supabase sync] worker delete success', json);
+      try { if (window.__crewtechSync) window.__crewtechSync.pendingWrites = 0; } catch(e) {}
+      if (typeof setSyncStrip === 'function')
+        setSyncStrip({ online: true, syncing: false, pendingWrites: 0, lastSyncAt: new Date().toISOString() });
+      return true;
+    } catch (err) {
+      console.warn('[Supabase sync] worker delete error', err);
+      if (typeof setSyncStrip === 'function') setSyncStrip({ online: navigator.onLine, syncing: false });
+      return false;
+    }
+  }
+
+  window.deleteWorkerFromSupabaseClient = deleteWorkerFromSupabaseClient;
+
   // Boot-time: fetch workers + jobs in parallel, then save + rerender once.
   async function refreshAllFromSupabase() {
     if (typeof navigator !== "undefined" && navigator.onLine === false) return;
@@ -2556,58 +2610,6 @@ document.addEventListener('DOMContentLoaded', () => {
       } finally {
         aiFillBtn.disabled = false;
         aiFillBtn.textContent = originalLabel;
-      }
-    });
-  }
-
-  /* ---- Add Job Parser UI (simple card) ---- */
-  const jobTextInput = document.getElementById('jobTextInput');
-  const parseJobButton = document.getElementById('parseJobButton');
-
-  if (jobTextInput && parseJobButton) {
-    parseJobButton.addEventListener('click', async () => {
-      const rawText = jobTextInput.value.trim();
-      if (!rawText) {
-        alert('Paste some job text first.');
-        return;
-      }
-
-      parseJobButton.disabled = true;
-      parseJobButton.textContent = 'Parsing...';
-
-      try {
-        const res = await fetch('/.netlify/functions/parseWithAI', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: rawText })
-        });
-
-        if (!res.ok) {
-          throw new Error('Server error: ' + res.status);
-        }
-
-        const data = await res.json();
-        console.log('Parsed job data:', data);
-
-        const nameEl = document.getElementById('jobNameInput');
-        const dateEl = document.getElementById('jobDateInput');
-        const startEl = document.getElementById('jobStartInput');
-        const endEl = document.getElementById('jobEndInput');
-        const locationEl = document.getElementById('jobLocationInput');
-        const workersEl = document.getElementById('jobWorkersInput');
-
-        if (nameEl) nameEl.value = data.jobName || '';
-        if (dateEl) dateEl.value = data.date || '';
-        if (startEl) startEl.value = data.startTime || '';
-        if (endEl) endEl.value = data.endTime || '';
-        if (locationEl) locationEl.value = data.location || '';
-        if (workersEl) workersEl.value = data.workerCount || '';
-      } catch (err) {
-        console.error(err);
-        alert('Error parsing job. Check console.');
-      } finally {
-        parseJobButton.disabled = false;
-        parseJobButton.textContent = 'Parse Job with AI';
       }
     });
   }
