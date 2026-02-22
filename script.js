@@ -3,6 +3,58 @@ const STORAGE_KEY = 'crewtech-data-v1';
 // TODO: paste your real Apps Script Web App URL between the quotes
 const WORKERS_CLOUD_URL = 'https://script.google.com/macros/s/AKfycbxyB2uZ7LP-7gDGxFNTf8gXHoJARKHzFbMg_v9c4HPYDRVd0L4qwJQ_tytakxvKg3-q/exec';
 
+/* ========== Owner / Magic-link scope (USER UUID) ========== */
+/**
+ * We scope ALL cloud reads/writes by user_id so datasets never crossover.
+ * Admin link should include: ?user_id=<uuid>
+ */
+function getOwnerUserId() {
+  try {
+    // 1) Explicit user_id in querystring (manual/admin link)
+    const url = new URL(window.location.href);
+    const qs = (url.searchParams.get("user_id") || url.searchParams.get("userId") || "").trim();
+    if (qs) return qs;
+
+    // 2) Supabase magic-link redirect commonly returns tokens in the URL hash:
+    //    #access_token=...&refresh_token=...&type=magiclink
+    const hash = String(window.location.hash || "");
+    if (!hash || hash.indexOf("access_token=") === -1) return "";
+
+    const params = new URLSearchParams(hash.replace(/^#/, ""));
+    const token = (params.get("access_token") || "").trim();
+    if (!token) return "";
+
+    // Decode JWT payload to get the stable user UUID ("sub")
+    const parts = token.split(".");
+    if (parts.length < 2) return "";
+
+    let payloadB64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    while (payloadB64.length % 4) payloadB64 += "=";
+
+    const json = JSON.parse(atob(payloadB64));
+    const sub = (json && json.sub ? String(json.sub).trim() : "");
+    return sub;
+  } catch (e) {
+    return "";
+  }
+}
+
+
+const OWNER_USER_ID = getOwnerUserId();
+window.OWNER_USER_ID = OWNER_USER_ID;
+
+
+function requireOwnerUserIdOrWarn() {
+  if (OWNER_USER_ID) return true;
+  console.warn("[CrewTech] Missing user_id in URL. Cloud sync is disabled for safety.");
+  try {
+    alert("This link is missing user_id. Cloud sync is disabled.\n\nUse your magic link (it should include ?user_id=...).");
+  } catch (_) {}
+  return false;
+}
+/* ========================================================== */
+
+
 /* ========== Storage Helpers ========== */
 function loadData() {
   try {
@@ -2212,9 +2264,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function upsertWorkerToSupabase(worker) {
+    try { if (OWNER_USER_ID && worker && typeof worker === 'object') worker.user_id = OWNER_USER_ID; } catch (_) {}
+
     console.log('[Supabase worker upsert] sending worker to Supabase', worker);
     try {
-      fetch('/.netlify/functions/upsertWorkerToSupabase', {
+      fetch(`/.netlify/functions/upsertWorkerToSupabase?user_id=${encodeURIComponent(OWNER_USER_ID || "")}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ worker })
@@ -2244,6 +2298,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function syncJobToSupabaseClient(job) {
+      try { if (OWNER_USER_ID && job && typeof job === 'object') job.user_id = OWNER_USER_ID; } catch (_) {}
+
     try {
       // Sync strip: online/offline hedge
       if (typeof setSyncStrip === 'function') setSyncStrip({ online: navigator.onLine, syncing: true });
@@ -2254,7 +2310,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       console.log('[syncJobToSupabaseClient] sending job to Supabase', job);
-      const res = await fetch('/.netlify/functions/syncJobToSupabase', {
+      const res = await fetch(`/.netlify/functions/syncJobToSupabase?user_id=${encodeURIComponent(OWNER_USER_ID || "")}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -2303,7 +2359,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     try {
-      const res = await fetch('/.netlify/functions/deleteJobFromSupabase', {
+      const res = await fetch(`/.netlify/functions/deleteJobFromSupabase?user_id=${encodeURIComponent(OWNER_USER_ID || "")}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ jobId })
@@ -2342,7 +2398,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     try {
-      const res = await fetch('/.netlify/functions/deleteWorkerFromSupabase', {
+      const res = await fetch(`/.netlify/functions/deleteWorkerFromSupabase?user_id=${encodeURIComponent(OWNER_USER_ID || "")}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ workerId })
@@ -2376,8 +2432,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       const [wRes, jRes] = await Promise.all([
-        fetch("/.netlify/functions/getWorkersFromSupabase"),
-        fetch("/.netlify/functions/getJobsFromSupabase")
+        fetch(`/.netlify/functions/getWorkersFromSupabase?user_id=${encodeURIComponent(OWNER_USER_ID || "")}`),
+        fetch(`/.netlify/functions/getJobsFromSupabase?user_id=${encodeURIComponent(OWNER_USER_ID || "")}`)
       ]);
 
       if (wRes.ok) {
@@ -2665,7 +2721,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       try {
         console.log('[Dev clear] calling Supabase clearAllData...');
-        const res = await fetch('/.netlify/functions/clearAllData', {
+        const res = await fetch(`/.netlify/functions/clearAllData?user_id=${encodeURIComponent(OWNER_USER_ID || "")}`, {
           method: 'POST'
         });
         const json = await res.json().catch(() => ({}));
