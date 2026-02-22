@@ -9,7 +9,29 @@ exports.handler = async (event) => {
     };
   }
 
-  const url = process.env.SUPABASE_URL;
+  
+  // Require owner scoping to avoid nuking shared prod data
+  const user_id_qs =
+    (event.queryStringParameters &&
+      (event.queryStringParameters.user_id || event.queryStringParameters.userId)) ||
+    "";
+
+  let user_id_body = "";
+  try {
+    const parsed = event.body ? JSON.parse(event.body) : {};
+    user_id_body = parsed.user_id || parsed.userId || "";
+  } catch (_) {}
+
+  const user_id = String(user_id_qs || user_id_body || "").trim();
+
+  if (!user_id) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ success: false, error: "Missing user_id" })
+    };
+  }
+
+const url = process.env.SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!url || !serviceKey) {
@@ -30,7 +52,7 @@ exports.handler = async (event) => {
 
   try {
     // Delete ALL jobs (id is not null => every row)
-    const deleteJobs = await fetch(`${baseUrl}/jobs?id=not.is.null`, {
+    const deleteJobs = await fetch(`${baseUrl}/jobs?user_id=eq.${encodeURIComponent(user_id)}`, {
       method: 'DELETE',
       headers
     });
@@ -40,7 +62,7 @@ exports.handler = async (event) => {
     }
 
     // Delete ALL workers
-    const deleteWorkers = await fetch(`${baseUrl}/workers?id=not.is.null`, {
+    const deleteWorkers = await fetch(`${baseUrl}/workers?user_id=eq.${encodeURIComponent(user_id)}`, {
       method: 'DELETE',
       headers
     });
